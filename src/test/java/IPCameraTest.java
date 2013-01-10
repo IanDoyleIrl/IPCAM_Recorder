@@ -31,7 +31,7 @@ public class IPCameraTest extends DataInputStream {
         while (count < 1000){
         try {
             HttpURLConnection connection;
-            URL cam = new URL("http://172.16.1.240:8081/videostream.cgi?user=root&pwd=Ferrari83!!2");
+            URL cam = new URL("http://172.16.1.240:8081/videostream.cgi?user=userName&pwd=Password");
             connection = (HttpURLConnection)cam.openConnection();
             connection.connect();
             connection.getInputStream();
