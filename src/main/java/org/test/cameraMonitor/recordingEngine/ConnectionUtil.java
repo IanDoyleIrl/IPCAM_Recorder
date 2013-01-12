@@ -1,3 +1,5 @@
+package org.test.cameraMonitor.recordingEngine;
+
 import dbAccess.EventType;
 import org.json.simple.JSONObject;
 
@@ -21,9 +23,15 @@ public class ConnectionUtil {
 
     private static final String RECORDING_INSERT = "INSERT INTO test.Recording (TIMESTAMP, RECORDED_IMAGE, COMMENTS) VALUES (?, ?, ?);";
 
+    private static final String RECORDING_SELECT_BY_ID = "SELECT RECORDED_IMAGE FROM test.Recording WHERE ID = ?";
+
+    private static final String EVENT_SELECT_BY_ID = "INSERT INTO test.Events (TIMESTAMP, RECORDED_IMAGE, COMMENTS) VALUES (?, ?, ?);";
+
     private static final String EVENTS_INSERT = "INSERT INTO test.Events (TIMESTAMP, RECORDED_IMAGE, COMMENTS) VALUES (?, ?, ?);";
 
     private static final String ALL_IMAGES_SELECT = "SELECT RECORDED_IMAGE FROM test.Recording;";
+
+    private static final String GET_LAST_RECORDING = "SELECT RECORDED_IMAGE FROM test.Recording ORDER BY ID DESC LIMIT 1;";
 
 
     public static JSONObject TestConnection(){
@@ -100,6 +108,42 @@ public class ConnectionUtil {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
+    }
+
+    public static byte[] getImageFromID(long id){
+        Connection conn = null;
+        ArrayList<byte[]> result = new ArrayList<byte[]>();
+        try {
+            conn = DBConnectionPool.getConnection();
+            PreparedStatement stat = conn.prepareStatement(ConnectionUtil.RECORDING_SELECT_BY_ID);
+            stat.setLong(1, id);
+            ResultSet rs = stat.executeQuery();
+            while (rs.next()){
+                return (rs.getBytes(1));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        return null;
+    }
+
+    public static byte[] getLastImage(){
+        Connection conn = null;
+        try {
+            conn = DBConnectionPool.getConnection();
+            Statement stat = conn.createStatement();
+            ResultSet rs = stat.executeQuery(ConnectionUtil.GET_LAST_RECORDING);
+            while (rs.next()){
+                return (rs.getBytes(1));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        return null;
     }
 
     public static ArrayList<byte[]> getAllImagesFromDatabaseAsList(){

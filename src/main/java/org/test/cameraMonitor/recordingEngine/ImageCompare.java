@@ -1,3 +1,5 @@
+package org.test.cameraMonitor.recordingEngine;
+
 import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGEncodeParam;
 import com.sun.image.codec.jpeg.JPEGImageDecoder;

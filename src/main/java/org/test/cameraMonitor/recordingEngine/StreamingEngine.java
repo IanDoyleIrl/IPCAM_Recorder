@@ -1,3 +1,5 @@
+package org.test.cameraMonitor.recordingEngine;
+
 import com.xuggle.mediatool.IMediaWriter;
 import com.xuggle.mediatool.ToolFactory;
 import com.xuggle.xuggler.ICodec;

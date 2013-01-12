@@ -1,4 +1,4 @@
-/**
+package org.test.cameraMonitor.recordingEngine; /**
  * Created with IntelliJ IDEA.
  * User: dreambrotherirl
  * Date: 06/01/2013
