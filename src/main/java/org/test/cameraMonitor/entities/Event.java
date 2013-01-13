@@ -1,8 +1,13 @@
 package org.test.cameraMonitor.entities;
 
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.test.cameraMonitor.constants.EventType;
+import org.test.cameraMonitor.util.HibernateUtil;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,6 +17,7 @@ import javax.persistence.*;
  * To change this template use File | Settings | File Templates.
  */
 @Entity
+@Table (name = "EVENT")
 public class Event {
 
     @Id
@@ -33,12 +39,15 @@ public class Event {
     @Column(nullable = true)
     private EventType eventType;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CAMERA_ID", nullable = false)
+    @ManyToOne
+    @JoinColumn(name="camera_id")
     private Camera camera;
 
-    public Event(long timeStarted) {
-        this.timeStarted = timeStarted;
+    @OneToMany(mappedBy="event")
+    private Set<EventImage> eventImages = new HashSet<EventImage>();
+
+    public Event() {
+        //this.timeStarted = timeStarted;
     }
 
     public long getID() {
@@ -87,5 +96,35 @@ public class Event {
 
     public void setEventType(EventType eventType) {
         this.eventType = eventType;
+    }
+
+    public Camera getCamera() {
+        return camera;
+    }
+
+    public void setCamera(Camera camera) {
+        this.camera = camera;
+    }
+
+    public Set<EventImage> getEventImages() {
+        return eventImages;
+    }
+
+    public void setEventImages(Set<EventImage> eventImages) {
+        this.eventImages = eventImages;
+    }
+
+    public void save(){
+        Transaction tx = null;
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        try {
+            tx = session.beginTransaction();
+            session.save(this);
+            tx.commit();
+            session.close();
+        }
+        catch (Exception e){
+
+        }
     }
 }

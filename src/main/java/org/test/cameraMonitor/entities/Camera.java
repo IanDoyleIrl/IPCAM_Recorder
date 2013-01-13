@@ -33,7 +33,7 @@ public class Camera {
 
     //private ControlSystem control;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "camera")
+    @OneToMany(mappedBy="camera")
     private Set<Event> events;
 
     public int getID() {

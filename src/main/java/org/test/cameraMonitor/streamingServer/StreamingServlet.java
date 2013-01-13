@@ -17,11 +17,8 @@ package org.test.cameraMonitor.streamingServer; /**
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-import org.hibernate.Criteria;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Property;
 import org.test.cameraMonitor.entities.RecordedImage;
+import org.test.cameraMonitor.entities.RecordedStream;
 import org.test.cameraMonitor.util.HibernateUtil;
 
 import javax.servlet.ServletConfig;
@@ -29,9 +26,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 
 
 /**
@@ -55,45 +50,21 @@ public class StreamingServlet extends HttpServlet {
 
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String pdfFileName = "test.pdf";
-        String contextPath = getServletContext().getRealPath(File.separator);
-        File pdfFile = new File(contextPath + pdfFileName);
-
-        //response.setContentLength((int) pdfFile.length());
-        String boundry = "--myboundary";
-        String empty = "\r\n";
-        byte[] b = boundry.getBytes();
-        //FileInputStream fileInputStream = new FileInputStream(pdfFile);
-        OutputStream responseOutputStream = response.getOutputStream();
-        response.setContentType("multipart/x-mixed-replace; boundary=--myboundary");
-        responseOutputStream.flush();
-        int bytes;
-        while ((true)) {
-            //responseOutputStream.write(b);
-            DetachedCriteria maxQuery = DetachedCriteria.forClass( RecordedImage.class );
-            maxQuery.setProjection( Projections.max("Id") );
-            Criteria query = HibernateUtil.getSessionFactory().openSession().createCriteria( RecordedImage.class );
-            query.add( Property.forName("Id").eq( maxQuery ) );
-            RecordedImage image = (RecordedImage) query.uniqueResult();
-            //response.addHeader("content-length", String.valueOf(image.getImageData().length));
-            //response.addHeader("content-type", "image/jpeg");
-            responseOutputStream.write(("--myboundary").getBytes());
-            responseOutputStream.write(("\r\n").getBytes());
-            responseOutputStream.write(("Content-Type:image/jpeg").getBytes());
-            responseOutputStream.write(("\r\n").getBytes());
-            responseOutputStream.write(("Content-Length:" + image.getImageData().length).getBytes());
-            responseOutputStream.write(("\r\n").getBytes());
-            //responseOutputStream.write(empty.getBytes());
-            //responseOutputStream.write(empty.getBytes());
-            responseOutputStream.write(("\r\n").getBytes());
-            responseOutputStream.write(image.getImageData());
-            responseOutputStream.write(b);
-            responseOutputStream.flush();
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        String streamingMode = request.getParameter("mode");
+        if (streamingMode.equals("live")){
+            StreamingUtils.handleLiveStreaming(response, request);
+        }
+        if (streamingMode.equals("recording")){
+            String recordingId = request.getParameter("recordingId");
+            RecordedStream recordedStream = (RecordedStream) HibernateUtil.getSessionFactory().openSession().get(RecordedStream.class, Integer.parseInt(recordingId));
+            if (recordedStream == null){
+                RecordedImage start = (RecordedImage)HibernateUtil.getSessionFactory().openSession().get(RecordedImage.class, 1);
+                RecordedImage end = (RecordedImage)HibernateUtil.getSessionFactory().openSession().get(RecordedImage.class, 100);
+                recordedStream = new RecordedStream();
+                recordedStream.setStartTime(start.getDate());
+                recordedStream.setEndTime(end.getDate());
             }
+            StreamingUtils.handleRecordedStreaming(response, request, recordedStream);
         }
     }
 

@@ -6,11 +6,25 @@
     </listener>
 
     <servlet>
-        <servlet-name>Test</servlet-name>
+        <servlet-name>Videostream</servlet-name>
         <servlet-class>org.test.cameraMonitor.streamingServer.StreamingServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>Test</servlet-name>
-        <url-pattern>/Test</url-pattern>
+        <servlet-name>Videostream</servlet-name>
+        <url-pattern>/Videostream</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>IPCameraMonitor</servlet-name>
+        <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+        <init-param>
+            <param-name>com.sun.jersey.config.property.packages</param-name>
+            <param-value>org.test.cameraMonitor.restAPI</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>IPCameraMonitor</servlet-name>
+        <url-pattern>/IPCameraMonitor/*</url-pattern>
     </servlet-mapping>
 </web-app>

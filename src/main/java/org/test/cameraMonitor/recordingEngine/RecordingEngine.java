@@ -2,9 +2,15 @@ package org.test.cameraMonitor.recordingEngine;
 
 import net.sf.jipcam.axis.MjpegFrame;
 import org.apache.commons.lang.time.DateFormatUtils;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.test.cameraMonitor.constants.EventType;
+import org.test.cameraMonitor.constants.GlobalAttributes;
 import org.test.cameraMonitor.entities.Camera;
+import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.EventImage;
 import org.test.cameraMonitor.entities.RecordedImage;
+import org.test.cameraMonitor.util.HibernateUtil;
 import org.test.cameraMonitor.util.Startup;
 
 import javax.imageio.ImageIO;
@@ -25,12 +31,17 @@ public class RecordingEngine implements Runnable {
 
     private BufferedImage originalCompareImage = null;
     private int compareCount = 0;
+    private int eventCount = 0;
+    private GlobalAttributes global = null;
+    private Camera camera;
 
     @Override
     public void run(){
         try{
+            global = GlobalAttributes.getInstance();
+            global.getAttributes().put("eventTriggered", false);
             HttpURLConnection connection;
-            Camera camera = Startup.getCamera();
+            camera = Startup.getCamera();
             URL cam = new URL(camera.getUrl());
             connection = (HttpURLConnection)cam.openConnection();
             System.out.println(connection.getContentType());
@@ -55,12 +66,24 @@ public class RecordingEngine implements Runnable {
         rImg.setImageData(tempImage);
         rImg.save();
         compareCount ++;
-        if (compareCount > 25){
+        eventCount ++;
+        if (compareCount > 10){
             if (originalCompareImage != null){
                 this.comparePreviousImageWithLatest(tempImage);
             }
             originalCompareImage = ImageIO.read(new ByteArrayInputStream(tempImage));
             compareCount = 0;
+        }
+        if (eventCount == 1000 & global.getAttributes().get("currentEvent") != null){
+            Transaction tx = null;
+            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            tx = session.beginTransaction();
+            Event event = (Event)global.getAttributes().get("currentEvent");
+            event.setTimeEnded(System.currentTimeMillis());
+            event.setEventType(EventType.UNSURE);
+            session.saveOrUpdate(event);
+            global.getAttributes().put("currentEvent", null);
+            global.getAttributes().put("eventTriggered", false);
         }
     }
 
@@ -73,6 +96,23 @@ public class RecordingEngine implements Runnable {
         ic.compare();
         System.out.println(ic.match());
         if (!ic.match()){
+            Transaction tx = null;
+            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            tx = session.beginTransaction();
+            //session.save(this);
+            //tx.commit();
+            //session.close();
+            boolean eventTriggered = (Boolean)global.getAttributes().get("eventTriggered");
+            if (!eventTriggered){
+                Event event = new Event();
+                event.setTimeStarted(System.currentTimeMillis());
+                event.setName("TEMPNAME - " + System.currentTimeMillis());
+                event.setCamera(camera);
+                event.setComments("Some comments go here");
+                session.save(event);
+                global.getAttributes().put("eventTriggered", true);
+                global.getAttributes().put("currentEvent", event);
+            }
             System.out.println("Event Triggered");
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             ImageIO.write(ic.getChangeIndicator(), "jpg", outputStream);
@@ -80,7 +120,13 @@ public class RecordingEngine implements Runnable {
             EventImage eImg = new EventImage();
             eImg.setDate(System.currentTimeMillis());
             eImg.setImageData(imageBytes);
-            eImg.save();
+            Event event = (Event)global.getAttributes().get("currentEvent");
+            event.getEventImages().add(eImg);
+            eImg.setEvent(event);
+            session.saveOrUpdate(event);
+            session.save(eImg);
+            tx.commit();
+            //session.close();
         }
     }
 

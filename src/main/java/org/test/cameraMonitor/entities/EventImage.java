@@ -1,7 +1,6 @@
 package org.test.cameraMonitor.entities;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,5 +15,17 @@ public class EventImage extends Image {
 
     public EventImage() {
         super();
+    }
+
+    @ManyToOne
+    @JoinColumn(name="event_id")
+    private Event event;
+
+    public Event getEvent() {
+        return event;
+    }
+
+    public void setEvent(Event event) {
+        this.event = event;
     }
 }

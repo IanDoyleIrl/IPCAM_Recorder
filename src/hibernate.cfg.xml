@@ -26,6 +26,7 @@
         <!-- Drop and re-create the database schema on startup -->
         <property name="hibernate.hbm2ddl.auto">create-drop</property>
 
+        <mapping class="org.test.cameraMonitor.entities.RecordedStream"/>
         <mapping class="org.test.cameraMonitor.entities.EventImage"/>
         <mapping class="org.test.cameraMonitor.entities.Image"/>
         <mapping class="org.test.cameraMonitor.entities.RecordedImage"/>
