@@ -2,6 +2,7 @@ package org.test.cameraMonitor.util;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.test.cameraMonitor.entities.RecordedImage;
 
 public class HibernateUtil {
 
@@ -21,6 +22,10 @@ public class HibernateUtil {
 
     public static SessionFactory getSessionFactory() {
         return sessionFactory;
+    }
+
+    public static RecordedImage getImageFromId(int id){
+        return (RecordedImage) HibernateUtil.getSessionFactory().openSession().get(RecordedImage.class, id);
     }
 
 }

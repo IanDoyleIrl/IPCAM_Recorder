@@ -1,5 +1,9 @@
 package org.test.cameraMonitor.restAPI;
 
+import org.hibernate.Criteria;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Property;
 import org.test.cameraMonitor.entities.RecordedImage;
 import org.test.cameraMonitor.recordingEngine.ConnectionUtil;
 import org.test.cameraMonitor.util.HibernateUtil;
@@ -8,9 +12,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.*;
+import java.io.IOException;
 
 
 // POJO, no interface no extends
@@ -34,9 +37,15 @@ public class Recording {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public String getImage() {
-        return "test";
+    @Produces("image/jpeg")
+    @Path("/latest")
+    public Response getLatestImage() throws IOException {
+        DetachedCriteria maxQuery = DetachedCriteria.forClass( RecordedImage.class );
+        maxQuery.setProjection( Projections.max( "Id" ) );
+        Criteria query = HibernateUtil.getSessionFactory().openSession().createCriteria( RecordedImage.class );
+        query.add( Property.forName("Id").eq( maxQuery ) );
+        RecordedImage image = (RecordedImage) query.uniqueResult();
+        return Response.ok(image.getImageData()).build();
     }
 
     @GET

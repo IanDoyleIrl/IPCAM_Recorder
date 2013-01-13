@@ -18,7 +18,7 @@ public class Startup {
         Camera camera = (Camera) session.get(Camera.class, 0);
         if (camera == null){
             camera = new Camera();
-            camera.setUrl("http://172.16.1.240:8081/videostream.cgi?user=name&pwd=passwd");
+            camera.setUrl("http://172.16.1.240:8081/videostream.cgi?user=root&pwd=Ferrari83!!2");
             camera.setName("DefaultCamera");
             camera.setActive(true);
             session.save(camera);
