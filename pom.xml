@@ -46,6 +46,11 @@
             <artifactId>hibernate-core</artifactId>
             <version>4.1.1.Final</version>
         </dependency>
+        <dependency>
+            <groupId>net.sf.jipcam</groupId>
+            <artifactId>jipcam</artifactId>
+            <version>0.9.1</version>
+        </dependency>
 
     </dependencies>
     <repositories>
@@ -66,7 +71,7 @@
                     <webResources>
                         <resource>
                             <!-- this is relative to the pom.xml directory -->
-                            <directory>warOutput</directory>
+                            <directory>target</directory>
                         </resource>
                     </webResources>
                 </configuration>
