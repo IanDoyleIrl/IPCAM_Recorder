@@ -8,7 +8,7 @@ import org.json.simple.JSONObject;
 import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.EventImage;
 import org.test.cameraMonitor.entities.RecordedImage;
-import org.test.cameraMonitor.restAPI.org.test.cameraMonitor.restAPI.utils.EventUtils;
+import org.test.cameraMonitor.util.EventUtils;
 import org.test.cameraMonitor.util.HibernateUtil;
 
 import javax.servlet.http.HttpServlet;

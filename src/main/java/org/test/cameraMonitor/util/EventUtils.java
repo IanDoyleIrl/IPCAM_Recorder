@@ -1,11 +1,10 @@
-package org.test.cameraMonitor.restAPI.org.test.cameraMonitor.restAPI.utils;
+package org.test.cameraMonitor.util;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.test.cameraMonitor.constants.GlobalAttributes;
 import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.EventImage;
-import org.test.cameraMonitor.util.HibernateUtil;
 
 import java.util.Iterator;
 
