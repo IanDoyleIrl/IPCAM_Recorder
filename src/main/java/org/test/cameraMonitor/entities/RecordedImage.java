@@ -1,6 +1,7 @@
 package org.test.cameraMonitor.entities;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 /**
  * Created with IntelliJ IDEA.

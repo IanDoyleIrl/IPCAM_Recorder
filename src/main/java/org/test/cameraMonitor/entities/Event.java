@@ -7,6 +7,7 @@ import org.test.cameraMonitor.util.HibernateUtil;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -19,6 +20,8 @@ import java.util.Set;
 @Entity
 @Table (name = "EVENT")
 public class Event {
+
+    private String queryString = "FROM RecordedImage WHERE Date > :start AND Date < :end ORDER BY Date ASC";
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
@@ -126,5 +129,18 @@ public class Event {
         catch (Exception e){
 
         }
+    }
+
+    public List<byte[]> getStream(){
+        org.hibernate.Query query = HibernateUtil.getSessionFactory().openSession().createQuery(this.queryString);
+        query.setParameter("start", (this.getTimeStarted() - 5000));
+        if (this.getTimeEnded() == 0){
+            query.setParameter("end", System.currentTimeMillis());
+        }
+        else{
+            query.setParameter("end", this.getTimeEnded());
+        }
+        List<RecordedImage> list = query.list();
+        return query.list();
     }
 }

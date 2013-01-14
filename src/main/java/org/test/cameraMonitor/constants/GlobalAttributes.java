@@ -12,6 +12,8 @@ import java.util.HashMap;
 public class GlobalAttributes {
     private static GlobalAttributes ourInstance = new GlobalAttributes();
     private HashMap<String, Object> attributes = new HashMap<String, Object>();
+    private int eventFrameCount = 0;
+    private int MJPEGSleepTime = 20;
 
     public static GlobalAttributes getInstance() {
         return ourInstance;
@@ -22,5 +24,21 @@ public class GlobalAttributes {
 
     public HashMap<String, Object> getAttributes(){
         return this.attributes;
+    }
+
+    public int getEventFrameCount(){
+        return this.eventFrameCount;
+    }
+
+    public void incrementEventFrameCount(){
+        this.eventFrameCount ++;
+    }
+
+    public void resetEventFrameCount(){
+        this.eventFrameCount = 0;
+    }
+
+    public int getMJPEGSleepTime() {
+        return this.MJPEGSleepTime;
     }
 }

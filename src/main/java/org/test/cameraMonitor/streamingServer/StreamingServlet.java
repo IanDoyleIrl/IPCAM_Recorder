@@ -17,7 +17,7 @@ package org.test.cameraMonitor.streamingServer; /**
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-import org.test.cameraMonitor.entities.RecordedImage;
+import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.RecordedStream;
 import org.test.cameraMonitor.util.HibernateUtil;
 
@@ -53,18 +53,27 @@ public class StreamingServlet extends HttpServlet {
         String streamingMode = request.getParameter("mode");
         if (streamingMode.equals("live")){
             StreamingUtils.handleLiveStreaming(response, request);
+
         }
         if (streamingMode.equals("recording")){
             String recordingId = request.getParameter("recordingId");
             RecordedStream recordedStream = (RecordedStream) HibernateUtil.getSessionFactory().openSession().get(RecordedStream.class, Integer.parseInt(recordingId));
-            if (recordedStream == null){
-                RecordedImage start = (RecordedImage)HibernateUtil.getSessionFactory().openSession().get(RecordedImage.class, 1);
-                RecordedImage end = (RecordedImage)HibernateUtil.getSessionFactory().openSession().get(RecordedImage.class, 100);
-                recordedStream = new RecordedStream();
-                recordedStream.setStartTime(start.getDate());
-                recordedStream.setEndTime(end.getDate());
+            if (recordedStream != null){
+                StreamingUtils.handleRecordedStreaming(response, request, recordedStream);
             }
-            StreamingUtils.handleRecordedStreaming(response, request, recordedStream);
+            else{
+                response.setStatus(404);
+            }
+        }
+        if (streamingMode.equals("event")){
+            String eventId = request.getParameter("eventId");
+            Event event = (Event) HibernateUtil.getSessionFactory().openSession().get(Event.class, Integer.parseInt(eventId));
+            if (event != null){
+                StreamingUtils.handleEventStreaming(response, request, event);
+            }
+            else{
+                response.setStatus(404);
+            }
         }
     }
 

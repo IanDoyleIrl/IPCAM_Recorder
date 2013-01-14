@@ -4,6 +4,8 @@ import org.hibernate.Criteria;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Property;
+import org.test.cameraMonitor.constants.GlobalAttributes;
+import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.RecordedImage;
 import org.test.cameraMonitor.entities.RecordedStream;
 import org.test.cameraMonitor.util.HibernateUtil;
@@ -30,6 +32,35 @@ public class StreamingUtils {
     public static void handleRecordedStreaming (HttpServletResponse response, HttpServletRequest request, RecordedStream recordedStream) throws IOException {
         //response.setContentLength((int) pdfFile.length());
         List streamData = recordedStream.getStream();
+        Iterator<RecordedImage> iterator = streamData.iterator();
+        String boundry = "--myboundary";
+        String empty = "\r\n";
+        byte[] b = boundry.getBytes();
+        //FileInputStream fileInputStream = new FileInputStream(pdfFile);
+        OutputStream responseOutputStream = response.getOutputStream();
+        response.setContentType("multipart/x-mixed-replace; boundary=--myboundary");
+        responseOutputStream.flush();
+        long frameTime = 0;
+        RecordedImage image = null;
+        while ((iterator.hasNext())) {
+            if (image == null){
+                image = iterator.next();
+            }
+            byte[] imageData = iterator.next().getImageData();
+            StreamingUtils.sendMJPEGFrame(responseOutputStream, imageData);
+            frameTime = image.getDate();
+            image = iterator.next();
+            try {
+                Thread.sleep(GlobalAttributes.getInstance().getMJPEGSleepTime());
+            } catch (InterruptedException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+        }
+    }
+
+    public static void handleEventStreaming (HttpServletResponse response, HttpServletRequest request, Event event) throws IOException {
+        //response.setContentLength((int) pdfFile.length());
+        List streamData = event.getStream();
         Iterator<RecordedImage> iterator = streamData.iterator();
         String boundry = "--myboundary";
         String empty = "\r\n";

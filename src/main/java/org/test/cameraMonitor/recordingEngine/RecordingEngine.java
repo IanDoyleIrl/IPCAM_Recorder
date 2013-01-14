@@ -38,6 +38,7 @@ public class RecordingEngine implements Runnable {
     @Override
     public void run(){
         try{
+//            Properties properties = Properti
             global = GlobalAttributes.getInstance();
             global.getAttributes().put("eventTriggered", false);
             HttpURLConnection connection;
@@ -49,6 +50,7 @@ public class RecordingEngine implements Runnable {
             MjpegFrame frame = null;
             while ((frame = in.readMjpegFrame()) != null) {
                 createAndSaveNewRecordedImage(frame, camera);
+                Thread.sleep(GlobalAttributes.getInstance().getMJPEGSleepTime());
             }
         } catch (EOFException eof) {
             eof.printStackTrace();
@@ -66,15 +68,18 @@ public class RecordingEngine implements Runnable {
         rImg.setImageData(tempImage);
         rImg.save();
         compareCount ++;
-        eventCount ++;
+        if ((Boolean)global.getAttributes().get("eventTriggered") == true){
+            global.incrementEventFrameCount();
+        }
         if (compareCount > 10){
             if (originalCompareImage != null){
                 this.comparePreviousImageWithLatest(tempImage);
             }
             originalCompareImage = ImageIO.read(new ByteArrayInputStream(tempImage));
             compareCount = 0;
+            global.getAttributes().put("eventFrameCount", 0);
         }
-        if (eventCount == 1000 & global.getAttributes().get("currentEvent") != null){
+        if (global.getEventFrameCount() >= 150 & global.getAttributes().get("currentEvent") != null){
             Transaction tx = null;
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             tx = session.beginTransaction();
@@ -82,8 +87,10 @@ public class RecordingEngine implements Runnable {
             event.setTimeEnded(System.currentTimeMillis());
             event.setEventType(EventType.UNSURE);
             session.saveOrUpdate(event);
+            tx.commit();
             global.getAttributes().put("currentEvent", null);
             global.getAttributes().put("eventTriggered", false);
+            global.resetEventFrameCount();
         }
     }
 
