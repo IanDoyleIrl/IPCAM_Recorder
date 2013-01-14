@@ -7,7 +7,8 @@
 
     <groupId>groupId</groupId>
     <artifactId>ZMAPI</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
+
 
 
     <dependencies>
@@ -60,14 +61,25 @@
         </repository>
     </repositories>
 
+
     <build>
         <finalName>IPCamMonitor</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <webXml>web\WEB-INF\web.xml</webXml>
+                </configuration>
+            </plugin>
+        </plugins>
         <resources>
             <resource>
                 <directory>${project.basedir}/src/</directory>
             </resource>
         </resources>
     </build>
+
 
 
 </project>
