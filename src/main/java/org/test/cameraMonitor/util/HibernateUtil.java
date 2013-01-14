@@ -10,6 +10,7 @@ public class HibernateUtil {
 
     private static SessionFactory buildSessionFactory() {
         try {
+            System.out.println("Trying local xml file!");
             SessionFactory sessionFactory = new Configuration()
                     .configure("hibernate.cfg.xml")
                     .buildSessionFactory();
