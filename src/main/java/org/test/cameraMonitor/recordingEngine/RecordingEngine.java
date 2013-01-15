@@ -120,7 +120,7 @@ public class RecordingEngine implements Runnable {
                 global.getAttributes().put("eventTriggered", true);
                 global.getAttributes().put("currentEvent", event);
             }
-            System.out.println("Event Triggered");
+            //System.out.println("Event Triggered");
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             ImageIO.write(ic.getChangeIndicator(), "jpg", outputStream);
             byte[] imageBytes = outputStream.toByteArray();
