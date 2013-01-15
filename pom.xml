@@ -67,7 +67,7 @@
      <includes>
        <include>**/*.xml</include>
     </includes>
-    <targetPath>${basedir}/src/main/java/</targetPath>
+    <targetPath>${basedir}/WEB-INF/classes/</targetPath>
 </resource>
 </resources>
         <plugins>
