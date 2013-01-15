@@ -101,6 +101,7 @@ public class StreamingUtils {
             Criteria query = HibernateUtil.getSessionFactory().openSession().createCriteria( RecordedImage.class );
             query.add( Property.forName("Id").eq( maxQuery ) );
             RecordedImage image = (RecordedImage) query.uniqueResult();
+            System.out.println("Sending mjpeg frame from id " + image.getId() + "sent");
             //response.addHeader("content-length", String.valueOf(image.getImageData().length));
             //response.addHeader("content-type", "image/jpeg");
             StreamingUtils.sendMJPEGFrame(responseOutputStream, image.getImageData());
@@ -114,6 +115,7 @@ public class StreamingUtils {
 
 
     private static void sendMJPEGFrame(OutputStream responseOutputStream, byte[] imageData) throws IOException{
+        System.out.println("Length " + imageData.length + "sent");
         responseOutputStream.write(("--myboundary").getBytes());
         responseOutputStream.write(("\r\n").getBytes());
         responseOutputStream.write(("Content-Type:image/jpeg").getBytes());
