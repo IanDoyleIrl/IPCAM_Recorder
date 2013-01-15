@@ -60,11 +60,14 @@
     </repositories>
 
     <build>
-        <resources>
-         <resource>
-                  <directory>/src/main/resources</directory>
-         </resource>
-         </resources>
+        <resource>
+    <directory>src/main/resources</directory>
+    <filtering>true</filtering>
+     <includes>
+       <include>**/*.xml</include>
+    </includes>
+    <targetPath>${basedir}/src/main/java/</targetPath>
+</resource>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
