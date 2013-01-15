@@ -60,6 +60,11 @@
     </repositories>
 
     <build>
+        <resources>
+         <resource>
+                  <directory>/src/main/resources</directory>
+         </resource>
+         </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -68,11 +73,6 @@
             </plugin>
         </plugins>
     </build>
-    <resources>
-         <resource>
-                  <directory>/src/main/resources</directory>
-         </resource>
-    </resources>
 
 
 
