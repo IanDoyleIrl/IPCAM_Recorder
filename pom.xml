@@ -3,13 +3,11 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
-
-    <groupId>groupId</groupId>
-    <artifactId>ZMAPI</artifactId>
-    <version>1.0</version>
-
-
+    <groupId>org.test.cameraMonitor</groupId>
+    <artifactId>CameraMonitor</artifactId>
+    <packaging>war</packaging>
+    <version>0.1</version>
+    <name>IP Camera Monitor</name>
 
     <dependencies>
         <dependency>
@@ -61,23 +59,14 @@
         </repository>
     </repositories>
 
-
     <build>
-        <finalName>IPCamMonitor</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <configuration>
-                    <webXml>web\WEB-INF\web.xml</webXml>
-                </configuration>
+                <version>2.3</version>
             </plugin>
         </plugins>
-        <resources>
-            <resource>
-                <directory>${project.basedir}/src/</directory>
-            </resource>
-        </resources>
     </build>
 
 
