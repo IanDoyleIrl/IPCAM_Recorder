@@ -47,8 +47,8 @@ public class RecordingEngine implements Runnable {
             connection = (HttpURLConnection)cam.openConnection();
             System.out.println(connection.getContentType());
             IPCameraTest in = new IPCameraTest(connection.getInputStream());
-            MjpegFrame frame = null;
-            while ((frame = in.readMjpegFrame()) != null) {
+            MjpegFrame frame = in.readMjpegFrame();
+            while (frame != null) {
                 createAndSaveNewRecordedImage(frame, camera);
                 Thread.sleep(GlobalAttributes.getInstance().getMJPEGSleepTime());
             }

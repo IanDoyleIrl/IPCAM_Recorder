@@ -51,29 +51,34 @@ public class StreamingServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String streamingMode = request.getParameter("mode");
-        if (streamingMode.equals("live")){
-            StreamingUtils.handleLiveStreaming(response, request);
+        try{
+            if (streamingMode.equals("live")){
+                StreamingUtils.handleLiveStreaming(response, request);
 
+            }
+            if (streamingMode.equals("recording")){
+                String recordingId = request.getParameter("recordingId");
+                RecordedStream recordedStream = (RecordedStream) HibernateUtil.getSessionFactory().openSession().get(RecordedStream.class, Integer.parseInt(recordingId));
+                if (recordedStream != null){
+                    StreamingUtils.handleRecordedStreaming(response, request, recordedStream);
+                }
+                else{
+                    response.setStatus(404);
+                }
+            }
+            if (streamingMode.equals("event")){
+                String eventId = request.getParameter("eventId");
+                Event event = (Event) HibernateUtil.getSessionFactory().openSession().get(Event.class, Integer.parseInt(eventId));
+                if (event != null){
+                    StreamingUtils.handleEventStreaming(response, request, event);
+                }
+                else{
+                    response.setStatus(404);
+                }
+            }
         }
-        if (streamingMode.equals("recording")){
-            String recordingId = request.getParameter("recordingId");
-            RecordedStream recordedStream = (RecordedStream) HibernateUtil.getSessionFactory().openSession().get(RecordedStream.class, Integer.parseInt(recordingId));
-            if (recordedStream != null){
-                StreamingUtils.handleRecordedStreaming(response, request, recordedStream);
-            }
-            else{
-                response.setStatus(404);
-            }
-        }
-        if (streamingMode.equals("event")){
-            String eventId = request.getParameter("eventId");
-            Event event = (Event) HibernateUtil.getSessionFactory().openSession().get(Event.class, Integer.parseInt(eventId));
-            if (event != null){
-                StreamingUtils.handleEventStreaming(response, request, event);
-            }
-            else{
-                response.setStatus(404);
-            }
+        catch (Exception e){
+
         }
     }
 

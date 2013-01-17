@@ -1,19 +1,20 @@
 package org.test.cameraMonitor.streamingServer;
 
-import org.hibernate.Criteria;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Property;
+import net.sf.jipcam.axis.MjpegFrame;
 import org.test.cameraMonitor.constants.GlobalAttributes;
+import org.test.cameraMonitor.entities.Camera;
 import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.RecordedImage;
 import org.test.cameraMonitor.entities.RecordedStream;
+import org.test.cameraMonitor.recordingEngine.IPCameraTest;
 import org.test.cameraMonitor.util.HibernateUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 
@@ -87,47 +88,37 @@ public class StreamingUtils {
         }
     }
 
-    public static void handleLiveStreaming(HttpServletResponse response, HttpServletRequest request) throws IOException {
-        //response.setContentLength((int) pdfFile.length());
-        //FileInputStream fileInputStream = new FileInputStream(pdfFile);
+    public static void handleLiveStreaming(HttpServletResponse response, HttpServletRequest request) throws IOException, InterruptedException {
+        boolean firstTime = true;
+        HttpURLConnection connection;
+        Camera camera = (Camera)HibernateUtil.getSessionFactory().openSession().get(Camera.class, 1);
+        URL cam = new URL(camera.getUrl());
+        connection = (HttpURLConnection)cam.openConnection();
+        IPCameraTest in = new IPCameraTest(connection.getInputStream());
         OutputStream responseOutputStream = response.getOutputStream();
         response.setContentType("multipart/x-mixed-replace; boundary=--myboundary");
         responseOutputStream.flush();
-        int bytes;
-        while ((true)) {
-            //responseOutputStream.write(b);
-            DetachedCriteria maxQuery = DetachedCriteria.forClass( RecordedImage.class );
-            maxQuery.setProjection( Projections.max("Id") );
-            Criteria query = HibernateUtil.getSessionFactory().openSession().createCriteria( RecordedImage.class );
-            query.add( Property.forName("Id").eq( maxQuery ) );
-            RecordedImage image = (RecordedImage) query.uniqueResult();
-            System.out.println("Sending mjpeg frame from id " + image.getId() + "sent");
-            //response.addHeader("content-length", String.valueOf(image.getImageData().length));
-            //response.addHeader("content-type", "image/jpeg");
-            StreamingUtils.sendMJPEGFrame(responseOutputStream, image.getImageData());
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            }
+        MjpegFrame frame = null;
+        while ((frame = in.readMjpegFrame()) != null) {
+            //System.out.println("FRM: " + frame.getJpegBytes().length);
+            //System.out.println("OUT: " + frame.getBytes().length);
+            sendMJPEGFrame(responseOutputStream, frame.getJpegBytes());
+            Thread.sleep(GlobalAttributes.getInstance().getMJPEGSleepTime());
+
         }
     }
 
 
     private static void sendMJPEGFrame(OutputStream responseOutputStream, byte[] imageData) throws IOException{
-        System.out.println("Length " + imageData.length + "sent");
         responseOutputStream.write(("--myboundary").getBytes());
         responseOutputStream.write(("\r\n").getBytes());
         responseOutputStream.write(("Content-Type:image/jpeg").getBytes());
         responseOutputStream.write(("\r\n").getBytes());
         responseOutputStream.write(("Content-Length:" + imageData.length).getBytes());
         responseOutputStream.write(("\r\n").getBytes());
-        //responseOutputStream.write(empty.getBytes());
-        //responseOutputStream.write(empty.getBytes());
         responseOutputStream.write(("\r\n").getBytes());
         responseOutputStream.write(imageData);
         responseOutputStream.write(b);
         responseOutputStream.flush();
-        //To change body of created methods use File | Settings | File Templates.
     }
 }
