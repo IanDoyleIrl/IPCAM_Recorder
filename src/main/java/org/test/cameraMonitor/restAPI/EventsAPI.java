@@ -1,9 +1,11 @@
 package org.test.cameraMonitor.restAPI;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Property;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.EventImage;
@@ -16,6 +18,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
 
 
 // POJO, no interface no extends
@@ -31,7 +35,28 @@ import java.io.IOException;
 public class EventsAPI extends HttpServlet {
 
     @GET
-    @Produces("image/jpeg")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/hours/{hours}")
+    public Response getEventsByHours(@PathParam("hours") int hours) throws IOException {
+        long currentDate = System.currentTimeMillis();
+        long previousDate = currentDate - (3600000 * hours);
+        Query query = HibernateUtil.getSessionFactory().openSession().createQuery
+                ("FROM Event WHERE timeStarted >= :beginTime");
+        query.setLong("beginTime", previousDate);
+        List<Event> events = query.list();
+        Iterator<Event> iterator = events.iterator();
+        JSONObject response = new JSONObject();
+        JSONArray eventsJSON = new JSONArray();
+        while (iterator.hasNext()){
+            JSONObject tempJSON = EventUtils.createEventJSON(iterator.next());
+            eventsJSON.add(tempJSON);
+        }
+        response.put("events", eventsJSON);
+        return Response.ok(response.toJSONString()).build();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/image/{id}")
     public Response getImageFromId(@PathParam("id") int id) throws IOException {
         EventImage image = (EventImage) HibernateUtil.getSessionFactory().openSession().get(EventImage.class, id);

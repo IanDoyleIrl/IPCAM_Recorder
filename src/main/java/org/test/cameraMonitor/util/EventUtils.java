@@ -22,7 +22,7 @@ public class EventUtils {
         if (event != null){
             response.put("id", event.getID());
             response.put("timeStarted", event.getTimeStarted());
-            if (event.getTimeEnded() == 0){
+            if (event.getTimeEnded() != 0){
                 response.put("timeEnded", System.currentTimeMillis());
             }
             response.put("comments", event.getComments());

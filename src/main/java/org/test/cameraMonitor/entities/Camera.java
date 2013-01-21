@@ -1,6 +1,10 @@
 package org.test.cameraMonitor.entities;
 
+import org.test.cameraMonitor.util.ControlUtils;
+
 import javax.persistence.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -18,6 +22,12 @@ public class Camera {
     @Column(name = "CAMERA_ID")
     @GeneratedValue(strategy=GenerationType.AUTO)
     private int ID;
+
+    @ElementCollection
+    @MapKeyColumn(name="name")
+    @Column(name="value")
+    @CollectionTable(name="CAMERA_CONTROLS", joinColumns=@JoinColumn(name="control_id"))
+    private Map<String, String> controlUrls = new HashMap<String, String>(); // maps from attribute name to value
 
     @Column(length = 40)
     private String name;
@@ -76,13 +86,15 @@ public class Camera {
         this.active = active;
     }
 
-
-
     public Set<Event> getEvents() {
         return events;
     }
 
     public void setEvents(Set<Event> events) {
         this.events = events;
+    }
+
+    public boolean handleMovement(String controlOption) {
+        return ControlUtils.sendControlCommand(this, this.controlUrls.get("up"));
     }
 }
