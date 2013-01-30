@@ -26,18 +26,27 @@ dojo.declare('core.eventWidget', [dijit._Widget, dijit._Templated],{
 
     postCreate : function(){
         _this = this;
-        this.startPollingForLatestEvent();
+        this.getEventsByHours(24);
     },
 
-    startPollingForLatestEvent : function (){
-        debugger;
-        var socket = new dojox.socket({
-            url:"/rt",
-            headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json"
-            }});
+    getEventsByHours : function (hours){
+        var xhrArgs = {
+            url: "/api/event/hours/" + hours,
+            handleAs: "text",
+            load: function(data){
+                _this.populateEventPane(data);
+            },
+            error: function(error){
+                alert(error);
+            }
+        }
+        // Call the asynchronous xhrGet
+        var deferred = dojo.xhrGet(xhrArgs);
+    },
+
+    populateEventPane : function(events){
 
     }
+
 
 });

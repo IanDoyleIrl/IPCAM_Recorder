@@ -8,16 +8,6 @@
     </listener>
 
     <servlet>
-        <servlet-name>RealtimeEvents</servlet-name>
-        <servlet-class>org.test.cameraMonitor.realtimeServer.RealtimeEventServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>RealtimeEvents</servlet-name>
-        <url-pattern>/rt</url-pattern>
-    </servlet-mapping>
-
-
-    <servlet>
         <servlet-name>Videostream</servlet-name>
         <servlet-class>org.test.cameraMonitor.streamingServer.StreamingServlet</servlet-class>
     </servlet>
