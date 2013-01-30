@@ -48,12 +48,6 @@ public class RecordingEngine implements Runnable {
     @Override
     public void run(){
         try{
-        this.testS3Connection();
-        }
-        catch (Exception e){
-
-        }
-        try{
 //            Properties properties = Properti
             global = GlobalAttributes.getInstance();
             global.getAttributes().put("eventTriggered", false);
