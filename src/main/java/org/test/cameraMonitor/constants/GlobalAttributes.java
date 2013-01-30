@@ -1,5 +1,8 @@
 package org.test.cameraMonitor.constants;
 
+import org.test.cameraMonitor.remoteStorage.RemoteStorageManager;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -14,6 +17,8 @@ public class GlobalAttributes {
     private HashMap<String, Object> attributes = new HashMap<String, Object>();
     private int eventFrameCount = 0;
     private int MJPEGSleepTime = 20;
+
+    private ArrayList<RemoteStorageManager> remoteStorageManagerArrayList = new ArrayList<RemoteStorageManager>();
 
     public static GlobalAttributes getInstance() {
         return ourInstance;

@@ -1,12 +1,17 @@
 package org.test.cameraMonitor.util;
 
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.test.cameraMonitor.constants.GlobalAttributes;
 import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.EventImage;
 
+import java.io.IOException;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,6 +21,23 @@ import java.util.Iterator;
  * To change this template use File | Settings | File Templates.
  */
 public class EventUtils {
+
+    public static ZipOutputStream getZipFromEventImages(Set<EventImage> images){
+        try{
+        Event rootEvent = images.iterator().next().getEvent();
+        ByteOutputStream fout = new ByteOutputStream();
+        ZipOutputStream zout = new ZipOutputStream(fout);
+        for (EventImage image : images){
+            zout.putNextEntry(new ZipEntry(String.valueOf(image.getDate())));
+            zout.write(image.getImageData(), 0, image.getImageData().length);
+            zout.closeEntry();
+        }
+            return zout;
+        }
+        catch (IOException e){
+            return null;
+        }
+    }
 
     public static JSONObject createEventJSON(Event event){
         JSONObject response = new JSONObject();

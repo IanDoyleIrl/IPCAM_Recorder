@@ -10,6 +10,7 @@ import org.test.cameraMonitor.entities.Camera;
 import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.EventImage;
 import org.test.cameraMonitor.entities.RecordedImage;
+import org.test.cameraMonitor.remoteStorage.AWS_S3StorageManager;
 import org.test.cameraMonitor.util.HibernateUtil;
 import org.test.cameraMonitor.util.Startup;
 
@@ -19,6 +20,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -35,8 +37,22 @@ public class RecordingEngine implements Runnable {
     private GlobalAttributes global = null;
     private Camera camera;
 
+    private void testS3Connection() throws IOException{
+        AWS_S3StorageManager s3 = new AWS_S3StorageManager();
+        List<EventImage> imageList = HibernateUtil.getSessionFactory().openSession().createQuery("From EventImage Where Id < 100").list();
+        for (EventImage img : imageList) {
+            EventImage e = s3.getRemoteCopyOfEventImage(img);
+        }
+    }
+
     @Override
     public void run(){
+        try{
+        this.testS3Connection();
+        }
+        catch (Exception e){
+
+        }
         try{
 //            Properties properties = Properti
             global = GlobalAttributes.getInstance();
