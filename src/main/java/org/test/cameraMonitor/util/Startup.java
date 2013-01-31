@@ -16,6 +16,12 @@ public class Startup {
         Session session = HibernateUtil.getSessionFactory().openSession();
         session.beginTransaction();
         Camera camera = (Camera) session.get(Camera.class, 0);
+        if (camera == null){
+            camera = new Camera();
+            camera.setUrl("http://172.16.1.240:8081/Videostream.cgi?user=root&pwd=Ferrari83!!2");
+            camera.setID(1);
+            camera.setActive(true);
+        }
         return camera;
     }
 
