@@ -2,6 +2,8 @@ package org.test.cameraMonitor.recordingEngine;
 
 import net.sf.jipcam.axis.MjpegFrame;
 import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.test.cameraMonitor.constants.EventType;
@@ -37,7 +39,11 @@ public class RecordingEngine implements Runnable {
     private GlobalAttributes global = null;
     private Camera camera;
 
+    Logger logger = LogManager.getLogger(RecordingEngine.class.getName());
+
     private void testS3Connection() throws IOException{
+        logger.error("error");
+        logger.trace("trace");
         AWS_S3StorageManager s3 = new AWS_S3StorageManager();
         List<EventImage> imageList = HibernateUtil.getSessionFactory().openSession().createQuery("From EventImage Where Id < 100").list();
         for (EventImage img : imageList) {
@@ -49,6 +55,9 @@ public class RecordingEngine implements Runnable {
     public void run(){
         try{
 //            Properties properties = Properti
+            logger.info("Starting run()");
+            logger.error("error");
+            logger.trace("trace");
             global = GlobalAttributes.getInstance();
             global.getAttributes().put("eventTriggered", false);
             HttpURLConnection connection;
@@ -60,6 +69,7 @@ public class RecordingEngine implements Runnable {
             MjpegFrame frame = in.readMjpegFrame();
             while (frame != null) {
                 createAndSaveNewRecordedImage(frame, camera);
+                logger.info("sleeping.....");
                 Thread.sleep(GlobalAttributes.getInstance().getMJPEGSleepTime());
             }
         } catch (EOFException eof) {
@@ -70,6 +80,7 @@ public class RecordingEngine implements Runnable {
     }
 
     private void createAndSaveNewRecordedImage(MjpegFrame frame, Camera camera) throws IOException {
+        logger.info("createAndSaveNewRecordedImage() frameLength: " + frame.getBytes().length + ", camera: " + camera.getID());
         String dateTime = DateFormatUtils.format(new Date().getTime(), "HH:MM:ss:SSSS");
         byte[] tempImage = (frame.getJpegBytes());
         RecordedImage rImg = new RecordedImage();
