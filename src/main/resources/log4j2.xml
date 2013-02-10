@@ -2,17 +2,12 @@
 <configuration status="OFF">
     <appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
         </Console>
-        <appender type="File" name="File" fileName="/var/logs/securitySystem.log">
-            <layout type="PatternLayout">
-                <pattern>%d %p %C{1.} [%t] %m%n</pattern>
-            </layout>
-        </appender>
     </appenders>
     <loggers>
-        <root level="info">
-            <appender-ref ref="File"/>
+        <root level="error">
+            <appender-ref ref="Console"/>
         </root>
     </loggers>
 </configuration>

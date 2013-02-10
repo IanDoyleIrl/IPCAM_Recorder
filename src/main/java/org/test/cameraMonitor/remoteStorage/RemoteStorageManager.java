@@ -5,7 +5,6 @@ import org.test.cameraMonitor.entities.EventImage;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.concurrent.SynchronousQueue;
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,8 +15,6 @@ import java.util.concurrent.SynchronousQueue;
  */
 public interface RemoteStorageManager extends Runnable {
 
-    public SynchronousQueue<EventImage> queue = new SynchronousQueue<EventImage>();
-
     public void uploadImageFromEvent(EventImage image);
 
     public boolean isEventImageSynced(EventImage image);
@@ -27,7 +24,4 @@ public interface RemoteStorageManager extends Runnable {
     public ArrayList<EventImage> getAllImagesByEvent(Event event);
 
     public void closeConnection();
-
-    public void addToQueue(EventImage eventImage);
-
 }

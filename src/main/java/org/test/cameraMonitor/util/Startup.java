@@ -1,6 +1,7 @@
 package org.test.cameraMonitor.util;
 
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.test.cameraMonitor.entities.Camera;
 
 /**
@@ -19,10 +20,24 @@ public class Startup {
         if (camera == null){
             camera = new Camera();
             camera.setUrl("http://172.16.1.240:8081/Videostream.cgi?user=root&pwd=Ferrari83!!2");
-            camera.setID(1);
+            //camera.setID(1);
             camera.setActive(true);
+            Startup.save(camera);
         }
         return camera;
     }
 
+    public static void save(Camera camera){
+        Transaction tx = null;
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        try {
+            tx = session.beginTransaction();
+            session.save(camera);
+            tx.commit();
+            session.close();
+        }
+        catch (Exception e){
+
+        }
+    }
 }

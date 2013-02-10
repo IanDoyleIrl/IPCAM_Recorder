@@ -59,18 +59,18 @@ public class RecordingEngine implements Runnable {
             logger.error("error");
             logger.trace("trace");
             global = GlobalAttributes.getInstance();
-            global.getAttributes().put("eventTriggered", false);
+            //global.getAttributes().put("eventTriggered", false);
             HttpURLConnection connection;
             camera = Startup.getCamera();
             URL cam = new URL(camera.getUrl());
             connection = (HttpURLConnection)cam.openConnection();
             System.out.println(connection.getContentType());
             IPCameraTest in = new IPCameraTest(connection.getInputStream());
-            MjpegFrame frame = in.readMjpegFrame();
-            while (frame != null) {
+            while (true) {
+                MjpegFrame frame = in.readMjpegFrame();
                 createAndSaveNewRecordedImage(frame, camera);
                 logger.info("sleeping.....");
-                Thread.sleep(GlobalAttributes.getInstance().getMJPEGSleepTime());
+                Thread.sleep(GlobalAttributes.getInstance().getSleepTime());
             }
         } catch (EOFException eof) {
             eof.printStackTrace();
@@ -80,7 +80,7 @@ public class RecordingEngine implements Runnable {
     }
 
     private void createAndSaveNewRecordedImage(MjpegFrame frame, Camera camera) throws IOException {
-        logger.info("createAndSaveNewRecordedImage() frameLength: " + frame.getBytes().length + ", camera: " + camera.getID());
+        System.out.println("createAndSaveNewRecordedImage() frameLength: " + frame.getBytes().length + ", camera: " + camera.getID());
         String dateTime = DateFormatUtils.format(new Date().getTime(), "HH:MM:ss:SSSS");
         byte[] tempImage = (frame.getJpegBytes());
         RecordedImage rImg = new RecordedImage();
@@ -89,7 +89,7 @@ public class RecordingEngine implements Runnable {
         rImg.setImageData(tempImage);
         rImg.save();
         compareCount ++;
-        if ((Boolean)global.getAttributes().get("eventTriggered") == true){
+        if (global.isEventTriggered() == true){
             global.incrementEventFrameCount();
         }
         if (compareCount > 10){
@@ -98,19 +98,19 @@ public class RecordingEngine implements Runnable {
             }
             originalCompareImage = ImageIO.read(new ByteArrayInputStream(tempImage));
             compareCount = 0;
-            global.getAttributes().put("eventFrameCount", 0);
+            global.resetEventFrameCount();
         }
-        if (global.getEventFrameCount() >= 150 & global.getAttributes().get("currentEvent") != null){
+        if (global.getEventFrameCount() >= global.getEventFrameTimeout() & global.getCurrentEvent() != null){
             Transaction tx = null;
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             tx = session.beginTransaction();
-            Event event = (Event)global.getAttributes().get("currentEvent");
+            Event event = global.getCurrentEvent();
             event.setTimeEnded(System.currentTimeMillis());
             event.setEventType(EventType.UNSURE);
             session.saveOrUpdate(event);
             tx.commit();
-            global.getAttributes().put("currentEvent", null);
-            global.getAttributes().put("eventTriggered", false);
+            global.resetCurrentEvent();
+            global.resetEventTriggered();
             global.resetEventFrameCount();
         }
     }
@@ -122,7 +122,7 @@ public class RecordingEngine implements Runnable {
         ic.setParameters(12, 8, 5, 10);
         ic.setDebugMode(0);
         ic.compare();
-        System.out.println(ic.match());
+        System.out.println(ic.match() + " - " + System.currentTimeMillis());
         if (!ic.match()){
             Transaction tx = null;
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
@@ -130,7 +130,7 @@ public class RecordingEngine implements Runnable {
             //session.save(this);
             //tx.commit();
             //session.close();
-            boolean eventTriggered = (Boolean)global.getAttributes().get("eventTriggered");
+            boolean eventTriggered = global.isEventTriggered();
             if (!eventTriggered){
                 Event event = new Event();
                 event.setTimeStarted(System.currentTimeMillis());
@@ -138,8 +138,11 @@ public class RecordingEngine implements Runnable {
                 event.setCamera(camera);
                 event.setComments("Some comments go here");
                 session.save(event);
-                global.getAttributes().put("eventTriggered", true);
-                global.getAttributes().put("currentEvent", event);
+                global.setCurrentEvent(event);
+                global.setEventTriggered(true);
+                if (global.isSendEmail()){
+                    global.getEmailQueue().add(event);
+                }
             }
             //System.out.println("Event Triggered");
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -148,12 +151,15 @@ public class RecordingEngine implements Runnable {
             EventImage eImg = new EventImage();
             eImg.setDate(System.currentTimeMillis());
             eImg.setImageData(imageBytes);
-            Event event = (Event)global.getAttributes().get("currentEvent");
+            Event event = global.getCurrentEvent();
             event.getEventImages().add(eImg);
             eImg.setEvent(event);
             session.saveOrUpdate(event);
             session.save(eImg);
             tx.commit();
+            if (global.isSendToS3()){
+                global.getS3Queue().add(eImg);
+            }
             //session.close();
         }
     }

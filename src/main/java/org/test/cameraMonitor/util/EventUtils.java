@@ -58,7 +58,7 @@ public class EventUtils {
                 image.put("time", eventImage.getDate());
                 eventImages.add(image);
             }
-            Event e = (Event) GlobalAttributes.getInstance().getAttributes().get("currentEvent");
+            Event e = (Event) GlobalAttributes.getInstance().getCurrentEvent();
             if (e != null){
                 if (e.getID() == event.getID()){
                     response.put("active", true);
@@ -80,7 +80,7 @@ public class EventUtils {
         if (totalEventCount > 0 && totalEventImageCount > 0){
             averageImagesPerEvent = totalEventCount / totalEventImageCount;
         }
-        Event activeEvent = (Event)GlobalAttributes.getInstance().getAttributes().get("currentEvent");
+        Event activeEvent = GlobalAttributes.getInstance().getCurrentEvent();
         long currentActiveEventId = 0;
         if (activeEvent != null){
             currentActiveEventId = activeEvent.getID();
@@ -89,7 +89,7 @@ public class EventUtils {
         response.put("totalEventCount", totalEventCount);
         response.put("totalEventImageCount", totalEventImageCount);
         response.put("currentActiveEventId", currentActiveEventId);
-        response.put("isEventActive", (Boolean)GlobalAttributes.getInstance().getAttributes().get("eventTriggered"));
+        response.put("isEventActive", (Boolean)GlobalAttributes.getInstance().isEventTriggered());
         response.put("averageImagesPerEvent", averageImagesPerEvent);
         response.put("eventFrameCountRemaining", GlobalAttributes.getInstance().getEventFrameCount());
         return response;

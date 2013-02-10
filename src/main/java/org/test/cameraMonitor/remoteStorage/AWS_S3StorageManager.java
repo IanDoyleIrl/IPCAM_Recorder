@@ -5,6 +5,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.*;
+import org.test.cameraMonitor.constants.GlobalAttributes;
 import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.EventImage;
 import org.test.cameraMonitor.util.HibernateUtil;
@@ -39,7 +40,7 @@ public class AWS_S3StorageManager implements RemoteStorageManager {
 
 
     private void createConnection(){
-        AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+        AWSCredentials credentials = new BasicAWSCredentials(GlobalAttributes.getInstance().getS3AccessKey(), GlobalAttributes.getInstance().getS3SecretKey());
         conn = new AmazonS3Client(credentials);
         this.root = this.getRootBucket();
     }
@@ -84,8 +85,8 @@ public class AWS_S3StorageManager implements RemoteStorageManager {
         metaData.put("name", String.valueOf(image.getDate()));
         metaData.put("eventId", String.valueOf(image.getEvent().getID()));
         metadata.setUserMetadata(metaData);
-        conn.putObject(root.getName(), this.getUploadNameFromEventImage(image) + ".jpeg", input, metadata);
-        System.out.println("Uploaded: " + root.getName() + "/" + this.getUploadNameFromEventImage(image) + ".jpeg");
+        conn.putObject(root.getName(), this.getUploadNameFromEventImage(image), input, metadata);
+        System.out.println("Uploaded: " + root.getName() + "/" + this.getUploadNameFromEventImage(image));
     }
 
     @Override
@@ -125,15 +126,6 @@ public class AWS_S3StorageManager implements RemoteStorageManager {
     public void closeConnection() {
     }
 
-    @Override
-    public void addToQueue(EventImage eventImage) {
-        try {
-            queue.put(eventImage);
-        } catch (InterruptedException e) {
-
-        }
-    }
-
     private EventImage getEventImageFromS3Response(S3Object response){
         try{
             Event event = (Event)HibernateUtil.getSessionFactory().openSession().get(Event.class, response.getObjectMetadata().getUserMetadata().get("eventId"));
@@ -152,11 +144,15 @@ public class AWS_S3StorageManager implements RemoteStorageManager {
     public void run() {
         while (true){
             try{
-                EventImage eventImage = queue.take();
-                this.uploadImageFromEvent(eventImage);
+                if (!GlobalAttributes.getInstance().getS3Queue().isEmpty()){
+                    EventImage eventImage = GlobalAttributes.getInstance().getS3Queue().remove();
+                    this.uploadImageFromEvent(eventImage);
+                }
+                Thread.sleep(500);
             }
             catch (Exception e){
-
+                System.out.print(e);
+                //Thread.sleep(500);
             }
         }
     }

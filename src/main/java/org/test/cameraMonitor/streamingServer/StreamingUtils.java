@@ -52,7 +52,7 @@ public class StreamingUtils {
             frameTime = image.getDate();
             image = iterator.next();
             try {
-                Thread.sleep(GlobalAttributes.getInstance().getMJPEGSleepTime());
+                Thread.sleep(GlobalAttributes.getInstance().getSleepTime());
             } catch (InterruptedException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
@@ -103,7 +103,7 @@ public class StreamingUtils {
             //System.out.println("FRM: " + frame.getJpegBytes().length);
             //System.out.println("OUT: " + frame.getBytes().length);
             sendMJPEGFrame(responseOutputStream, frame.getJpegBytes());
-            Thread.sleep(GlobalAttributes.getInstance().getMJPEGSleepTime());
+            Thread.sleep(GlobalAttributes.getInstance().getSleepTime());
 
         }
     }

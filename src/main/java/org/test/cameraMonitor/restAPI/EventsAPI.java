@@ -95,11 +95,11 @@ public class EventsAPI extends HttpServlet {
     @Produces("image/jpeg")
     @Path("/image/latest")
     public Response getLatestImage() throws IOException {
-        DetachedCriteria maxQuery = DetachedCriteria.forClass( RecordedImage.class );
+        DetachedCriteria maxQuery = DetachedCriteria.forClass( EventImage.class );
         maxQuery.setProjection( Projections.max( "Id" ) );
         Criteria query = HibernateUtil.getSessionFactory().openSession().createCriteria( EventImage.class );
         query.add( Property.forName("Id").eq(maxQuery) );
-        RecordedImage image = (RecordedImage) query.uniqueResult();
+        EventImage image = (EventImage) query.uniqueResult();
         if (image == null){
             throw new WebApplicationException(404);
         }
