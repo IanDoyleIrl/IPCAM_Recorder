@@ -2,6 +2,7 @@ package org.test.cameraMonitor.recordingEngine;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.test.cameraMonitor.remoteStorage.AWS_S3StorageManager;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -29,7 +30,7 @@ public class RecordingThreadManager implements ServletContextListener {
         final List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
 
         tasks.add(Executors.callable(new RecordingEngine()));
-        //tasks.add(Executors.callable(new AWS_S3StorageManager()));
+        tasks.add(Executors.callable(new AWS_S3StorageManager()));
         //tasks.add(Executors.callable(new EmailManager()));
         try {
             executor.invokeAll(tasks);
