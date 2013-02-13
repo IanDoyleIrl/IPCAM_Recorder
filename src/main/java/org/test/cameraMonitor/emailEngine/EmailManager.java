@@ -71,11 +71,26 @@ public class EmailManager implements Runnable {
             // create the message part
             MimeBodyPart messageBodyPart = new MimeBodyPart();
 
-            //fill message
-            messageBodyPart.setText("Name:          " + event.getName() + "\n" +
-                                    "Id:            " + event.getID() + "\n" +
-                                    "Time Started:  " + dateStamp + "\n" +
-                                    "Camera:        " + event.getCamera().getName() + "\n");
+            String messageBody =    "<table>" +
+                    "<tr>" +
+                    "<td><b>ID:</b></td>" +
+                    "<td>" + event.getID() + "</td>" +
+                    "</tr>" +
+                    "<tr>" +
+                    "<td><b>Name:</b></td>" +
+                    "<td>" + event.getName() + "</td>" +
+                    "</tr>" +
+                    "<tr>" +
+                    "<td><b>Comments:</b></td>" +
+                    "<td>" + event.getComments() + "</td>" +
+                    "</tr>" +
+                    "<tr>" +
+                    "<td><b>Start Time:</b></td>" +
+                    "<td>" + dateStamp + "</td>" +
+                    "</tr>" +
+                    "</table>";
+
+            messageBodyPart.setContent(messageBody, "text/html");
 
             Multipart multipart = new MimeMultipart();
             multipart.addBodyPart(messageBodyPart);
