@@ -17,6 +17,7 @@ package org.test.cameraMonitor.streamingServer; /**
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+import org.test.cameraMonitor.entities.Camera;
 import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.RecordedStream;
 import org.test.cameraMonitor.util.HibernateUtil;
@@ -51,13 +52,14 @@ public class StreamingServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String streamingMode = request.getParameter("mode");
+        String cameraID = request.getParameter("cameraId");
         try{
-            if (streamingMode.equals("live")){
-                StreamingUtils.handleLiveStreaming(response, request);
-
+            if (streamingMode.equals("live") & cameraID != null){
+                StreamingUtils.handleLiveStreaming(response, request, (Camera)HibernateUtil.getSessionFactory().openSession().get(Camera.class, Integer.parseInt(cameraID)));
             }
             if (streamingMode.equals("recording")){
                 String recordingId = request.getParameter("recordingId");
+               // String cameraId
                 RecordedStream recordedStream = (RecordedStream) HibernateUtil.getSessionFactory().openSession().get(RecordedStream.class, Integer.parseInt(recordingId));
                 if (recordedStream != null){
                     StreamingUtils.handleRecordedStreaming(response, request, recordedStream);
@@ -78,7 +80,7 @@ public class StreamingServlet extends HttpServlet {
             }
         }
         catch (Exception e){
-
+            response.setStatus(500);
         }
     }
 

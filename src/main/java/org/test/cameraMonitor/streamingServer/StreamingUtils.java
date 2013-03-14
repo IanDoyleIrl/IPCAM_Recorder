@@ -7,7 +7,6 @@ import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.RecordedImage;
 import org.test.cameraMonitor.entities.RecordedStream;
 import org.test.cameraMonitor.recordingEngine.IPCameraTest;
-import org.test.cameraMonitor.util.HibernateUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -52,7 +51,7 @@ public class StreamingUtils {
             frameTime = image.getDate();
             image = iterator.next();
             try {
-                Thread.sleep(GlobalAttributes.getInstance().getSleepTime());
+                Thread.sleep(1000 / Integer.parseInt(GlobalAttributes.getInstance().getConfigValue("FramesPerSecond")));
             } catch (InterruptedException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
@@ -88,10 +87,9 @@ public class StreamingUtils {
         }
     }
 
-    public static void handleLiveStreaming(HttpServletResponse response, HttpServletRequest request) throws IOException, InterruptedException {
+    public static void handleLiveStreaming(HttpServletResponse response, HttpServletRequest request, Camera camera) throws IOException, InterruptedException {
         boolean firstTime = true;
         HttpURLConnection connection;
-        Camera camera = (Camera)HibernateUtil.getSessionFactory().openSession().get(Camera.class, 1);
         URL cam = new URL(camera.getUrl());
         connection = (HttpURLConnection)cam.openConnection();
         IPCameraTest in = new IPCameraTest(connection.getInputStream());
@@ -103,7 +101,7 @@ public class StreamingUtils {
             //System.out.println("FRM: " + frame.getJpegBytes().length);
             //System.out.println("OUT: " + frame.getBytes().length);
             sendMJPEGFrame(responseOutputStream, frame.getJpegBytes());
-            Thread.sleep(GlobalAttributes.getInstance().getSleepTime());
+            Thread.sleep(1000 / Integer.parseInt(GlobalAttributes.getInstance().getConfigValue("FramesPerSecond")));
 
         }
     }

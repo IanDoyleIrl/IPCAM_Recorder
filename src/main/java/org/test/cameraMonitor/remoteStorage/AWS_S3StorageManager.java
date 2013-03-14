@@ -40,7 +40,7 @@ public class AWS_S3StorageManager implements RemoteStorageManager {
 
 
     private void createConnection(){
-        AWSCredentials credentials = new BasicAWSCredentials(GlobalAttributes.getInstance().getS3AccessKey(), GlobalAttributes.getInstance().getS3SecretKey());
+        AWSCredentials credentials = new BasicAWSCredentials(GlobalAttributes.getInstance().getConfigValue("S3AccessKey"), GlobalAttributes.getInstance().getConfigValue("S3SecretKey"));
         conn = new AmazonS3Client(credentials);
         this.root = this.getRootBucket();
     }
@@ -65,7 +65,7 @@ public class AWS_S3StorageManager implements RemoteStorageManager {
     }
 
     private String getBucketNameFromEvent(Event event){
-        return "securitysysytem/" + event.getName() + "-" + event.getID();
+        return event.getName() + "-" + event.getID();
 
     }
 

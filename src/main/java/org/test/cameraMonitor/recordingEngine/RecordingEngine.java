@@ -12,17 +12,16 @@ import org.test.cameraMonitor.entities.Camera;
 import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.EventImage;
 import org.test.cameraMonitor.entities.RecordedImage;
-import org.test.cameraMonitor.remoteStorage.AWS_S3StorageManager;
 import org.test.cameraMonitor.util.HibernateUtil;
-import org.test.cameraMonitor.util.Startup;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -38,17 +37,25 @@ public class RecordingEngine implements Runnable {
     private int eventCount = 0;
     private GlobalAttributes global = null;
     private Camera camera;
+    private String s =  GlobalAttributes.getInstance().getConfigValue("FramesPerSecond");
+    private int framesPerSeconds;
+    private boolean running = true;
+    private long lastCheckTime = System.currentTimeMillis();
 
     Logger logger = LogManager.getLogger(RecordingEngine.class.getName());
 
-    private void testS3Connection() throws IOException{
-        logger.error("error");
-        logger.trace("trace");
-        AWS_S3StorageManager s3 = new AWS_S3StorageManager();
-        List<EventImage> imageList = HibernateUtil.getSessionFactory().openSession().createQuery("From EventImage Where Id < 100").list();
-        for (EventImage img : imageList) {
-            EventImage e = s3.getRemoteCopyOfEventImage(img);
+    public RecordingEngine(Camera camera){
+        this.camera = camera;
+        try{
+            this.framesPerSeconds = Integer.parseInt(s);
         }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void shutdownThread(){
+        this.running = false;
     }
 
     @Override
@@ -61,16 +68,15 @@ public class RecordingEngine implements Runnable {
             global = GlobalAttributes.getInstance();
             //global.getAttributes().put("eventTriggered", false);
             HttpURLConnection connection;
-            camera = Startup.getCamera();
             URL cam = new URL(camera.getUrl());
             connection = (HttpURLConnection)cam.openConnection();
             System.out.println(connection.getContentType());
             IPCameraTest in = new IPCameraTest(connection.getInputStream());
-            while (true) {
+            while (running) {
                 MjpegFrame frame = in.readMjpegFrame();
                 createAndSaveNewRecordedImage(frame, camera);
                 logger.info("sleeping.....");
-                Thread.sleep(GlobalAttributes.getInstance().getSleepTime());
+                Thread.sleep(1000 / framesPerSeconds);
             }
         } catch (EOFException eof) {
             eof.printStackTrace();
@@ -90,7 +96,7 @@ public class RecordingEngine implements Runnable {
         rImg.save();
         compareCount ++;
         if (global.isEventTriggered() == true){
-            global.incrementEventFrameCount();
+            global.setEventTimestamp(System.currentTimeMillis());
         }
         if (compareCount > 10){
             if (originalCompareImage != null){
@@ -98,9 +104,11 @@ public class RecordingEngine implements Runnable {
             }
             originalCompareImage = ImageIO.read(new ByteArrayInputStream(tempImage));
             compareCount = 0;
-            global.resetEventFrameCount();
+            global.resetEventTimestamp();
         }
-        if (global.getEventFrameCount() >= global.getEventFrameTimeout() & global.getCurrentEvent() != null){
+        long diff = ((System.currentTimeMillis() - global.getEventTimestamp()) / 1000);
+        if (global.getCurrentEvent() != null &
+                ((System.currentTimeMillis() - global.getEventTimestamp()) / 1000) >= Integer.parseInt(global.getConfigValue("EventTimeout"))){
             Transaction tx = null;
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             tx = session.beginTransaction();
@@ -109,10 +117,16 @@ public class RecordingEngine implements Runnable {
             event.setEventType(EventType.UNSURE);
             session.saveOrUpdate(event);
             tx.commit();
-            global.resetCurrentEvent();
-            global.resetEventTriggered();
-            global.resetEventFrameCount();
+            global.setCurrentEvent(null);
+            global.setEventTriggered(false);
+            global.resetEventTimestamp();
         }
+    }
+
+    public String convertTime(long time){
+        Date date = new Date(time);
+        Format format = new SimpleDateFormat("dd-MM-yyyy - HH:mm:ss");
+        return format.format(date).toString();
     }
 
     private void comparePreviousImageWithLatest(byte[] tempImage) throws IOException {
@@ -134,13 +148,13 @@ public class RecordingEngine implements Runnable {
             if (!eventTriggered){
                 Event event = new Event();
                 event.setTimeStarted(System.currentTimeMillis());
-                event.setName("TEMPNAME - " + System.currentTimeMillis());
+                event.setName(convertTime(System.currentTimeMillis()));
                 event.setCamera(camera);
                 event.setComments("Some comments go here");
                 session.save(event);
                 global.setCurrentEvent(event);
                 global.setEventTriggered(true);
-                if (global.isSendEmail()){
+                if (Boolean.parseBoolean(global.getConfigValue("SendToEmail"))){
                     global.getEmailQueue().add(event);
                 }
             }
@@ -157,7 +171,7 @@ public class RecordingEngine implements Runnable {
             session.saveOrUpdate(event);
             session.save(eImg);
             tx.commit();
-            if (global.isSendToS3()){
+            if (Boolean.parseBoolean(global.getConfigValue("SendToS3"))){
                 global.getS3Queue().add(eImg);
             }
             //session.close();

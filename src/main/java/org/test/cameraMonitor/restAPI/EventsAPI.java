@@ -9,7 +9,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.EventImage;
-import org.test.cameraMonitor.entities.RecordedImage;
 import org.test.cameraMonitor.util.EventUtils;
 import org.test.cameraMonitor.util.HibernateUtil;
 
@@ -56,7 +55,7 @@ public class EventsAPI extends HttpServlet {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces("image/jpeg")
     @Path("/image/{id}")
     public Response getImageFromId(@PathParam("id") int id) throws IOException {
         EventImage image = (EventImage) HibernateUtil.getSessionFactory().openSession().get(EventImage.class, id);

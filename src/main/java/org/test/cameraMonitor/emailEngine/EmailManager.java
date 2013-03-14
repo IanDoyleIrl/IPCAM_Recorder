@@ -35,20 +35,19 @@ public class EmailManager implements Runnable {
             }
             catch (Exception e){
                 System.out.print(e);
-                //Thread.sleep(500);
             }
         }
     }
 
     private void handleEventForEmail(Event event) throws MessagingException {
-        final String username = GlobalAttributes.getInstance().getSMTPUsername();
-        final String password = GlobalAttributes.getInstance().getSMTPPassword();
+        final String username = GlobalAttributes.getInstance().getConfigValue("SmtpUsername");
+        final String password = GlobalAttributes.getInstance().getConfigValue("SmtpPassword");
 
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.host", GlobalAttributes.getInstance().getSMTPServer());
-        props.put("mail.smtp.port", GlobalAttributes.getInstance().getSTMPPort());
+        props.put("mail.smtp.host", GlobalAttributes.getInstance().getConfigValue("SmtpServer"));
+        props.put("mail.smtp.port", GlobalAttributes.getInstance().getConfigValue("SmtpPort"));
 
 
         Session session = Session.getInstance(props,
@@ -62,7 +61,7 @@ public class EmailManager implements Runnable {
 
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress("admin@security.com"));
-            for (String s : GlobalAttributes.getInstance().getEmailAddresses()){
+            for (String s : GlobalAttributes.getInstance().getConfigValue("EmailAddresses").split(";")){
                 message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(s));
             }
             String dateStamp = new java.util.Date(event.getTimeStarted()).toString();

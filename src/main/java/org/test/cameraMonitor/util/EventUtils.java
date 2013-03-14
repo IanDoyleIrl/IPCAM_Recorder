@@ -8,7 +8,6 @@ import org.test.cameraMonitor.entities.EventImage;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.zip.ZipEntry;
@@ -91,7 +90,7 @@ public class EventUtils {
         response.put("currentActiveEventId", currentActiveEventId);
         response.put("isEventActive", (Boolean)GlobalAttributes.getInstance().isEventTriggered());
         response.put("averageImagesPerEvent", averageImagesPerEvent);
-        response.put("eventFrameCountRemaining", GlobalAttributes.getInstance().getEventFrameCount());
+        response.put("lastEventTimestamp", GlobalAttributes.getInstance().getEventTimestamp());
         return response;
     }
 }
