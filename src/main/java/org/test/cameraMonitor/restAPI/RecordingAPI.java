@@ -5,14 +5,18 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Property;
 import org.json.simple.JSONObject;
+import org.test.cameraMonitor.entities.Image;
 import org.test.cameraMonitor.entities.RecordedImage;
+import org.test.cameraMonitor.util.APIUtils;
 import org.test.cameraMonitor.util.HibernateUtil;
+import org.test.cameraMonitor.util.ImageUtils;
 
 import javax.servlet.http.HttpServlet;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.ArrayList;
 
 
 // POJO, no interface no extends
@@ -28,10 +32,20 @@ import java.io.IOException;
 public class RecordingAPI extends HttpServlet {
 
     @GET
+    @Produces("application/zip")
+    @Path("/zip/{startTime}/{endTime}")
+    public Response getImagesAsZip(@PathParam("startTime") long start, @PathParam("endTime") long end) throws IOException {
+        ArrayList<Image> images = (ArrayList)APIUtils.getRecordingArrayByStartEndDate(start, end);
+        byte[] zipContents = APIUtils.getZipFromImageArray(images, start + "-" + end).toByteArray();
+        return Response.ok(zipContents).build();
+    }
+
+    @GET
     @Produces("image/jpeg")
     @Path("/image/{id}")
     public Response getImageFromId(@PathParam("id") int id) throws IOException {
-        RecordedImage image = (RecordedImage) HibernateUtil.getSessionFactory().openSession().get(RecordedImage.class, id);
+        Image image = (RecordedImage) HibernateUtil.getSessionFactory().openSession().get(RecordedImage.class, id);
+        image = ImageUtils.putTimpStampOnImage(image, APIUtils.getTimestampFromLong(image.getDate()));
         if (image == null){
             throw new WebApplicationException(404);
         }

@@ -52,9 +52,9 @@ public class StreamingServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String streamingMode = request.getParameter("mode");
-        String cameraID = request.getParameter("cameraId");
         try{
-            if (streamingMode.equals("live") & cameraID != null){
+            if (streamingMode.equals("live")){
+                String cameraID = request.getParameter("cameraId");
                 StreamingUtils.handleLiveStreaming(response, request, (Camera)HibernateUtil.getSessionFactory().openSession().get(Camera.class, Integer.parseInt(cameraID)));
             }
             if (streamingMode.equals("recording")){

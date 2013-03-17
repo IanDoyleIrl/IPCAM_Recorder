@@ -2,6 +2,7 @@ package org.test.cameraMonitor.constants;
 
 import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.EventImage;
+import org.test.cameraMonitor.remoteStorage.AWS_S3StorageManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +19,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class GlobalAttributes {
 
     private static GlobalAttributes ourInstance = new GlobalAttributes();
+    private AWS_S3StorageManager s3StorageManager;
     private HashMap<String, String> configValues = new HashMap<String, String>();
     private ConcurrentLinkedQueue<EventImage> S3Queue = new ConcurrentLinkedQueue<EventImage>();
     private ConcurrentLinkedQueue<Event> emailQueue = new ConcurrentLinkedQueue<Event>();
@@ -80,4 +82,14 @@ public class GlobalAttributes {
     public void setEventTimestamp(long eventTimestamp) {
         this.eventTimestamp = eventTimestamp;
     }
+
+    public void setS3StorageManager(AWS_S3StorageManager manager){
+        this.s3StorageManager = manager;
+    }
+
+    public AWS_S3StorageManager getS3StorageManager(){
+        return this.s3StorageManager;
+    }
 }
+
+

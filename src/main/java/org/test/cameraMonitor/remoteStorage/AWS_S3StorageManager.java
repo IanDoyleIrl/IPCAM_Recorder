@@ -8,6 +8,7 @@ import com.amazonaws.services.s3.model.*;
 import org.test.cameraMonitor.constants.GlobalAttributes;
 import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.EventImage;
+import org.test.cameraMonitor.entities.Image;
 import org.test.cameraMonitor.util.HibernateUtil;
 
 import java.io.ByteArrayInputStream;
@@ -37,8 +38,6 @@ public class AWS_S3StorageManager implements RemoteStorageManager {
         this.createConnection();
     }
 
-
-
     private void createConnection(){
         AWSCredentials credentials = new BasicAWSCredentials(GlobalAttributes.getInstance().getConfigValue("S3AccessKey"), GlobalAttributes.getInstance().getConfigValue("S3SecretKey"));
         conn = new AmazonS3Client(credentials);
@@ -51,7 +50,7 @@ public class AWS_S3StorageManager implements RemoteStorageManager {
                 return b;
             }
         }
-        return null;
+        return conn.createBucket("securitysystem");
     }
 
     private Bucket getEventFolder(Event event){
@@ -65,7 +64,7 @@ public class AWS_S3StorageManager implements RemoteStorageManager {
     }
 
     private String getBucketNameFromEvent(Event event){
-        return event.getName() + "-" + event.getID();
+        return event.getName();
 
     }
 
@@ -111,9 +110,9 @@ public class AWS_S3StorageManager implements RemoteStorageManager {
     }
 
     @Override
-    public ArrayList<EventImage> getAllImagesByEvent(Event event) {
+    public ArrayList<Image> getAllImagesByEvent(Event event) {
         Bucket bucket = this.getEventFolder(event);
-        ArrayList<EventImage> eventImages = new ArrayList<EventImage>();
+        ArrayList<Image> eventImages = new ArrayList<Image>();
         ObjectListing images = conn.listObjects(bucket.getName());
         for (S3ObjectSummary summary : images.getObjectSummaries()){
             S3Object response = conn.getObject(bucket.getName(), summary.getKey());
@@ -142,6 +141,7 @@ public class AWS_S3StorageManager implements RemoteStorageManager {
 
     @Override
     public void run() {
+        GlobalAttributes.getInstance().setS3StorageManager(this);
         while (true){
             try{
                 if (!GlobalAttributes.getInstance().getS3Queue().isEmpty()){

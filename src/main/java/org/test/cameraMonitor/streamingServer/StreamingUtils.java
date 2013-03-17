@@ -2,11 +2,10 @@ package org.test.cameraMonitor.streamingServer;
 
 import net.sf.jipcam.axis.MjpegFrame;
 import org.test.cameraMonitor.constants.GlobalAttributes;
-import org.test.cameraMonitor.entities.Camera;
-import org.test.cameraMonitor.entities.Event;
-import org.test.cameraMonitor.entities.RecordedImage;
-import org.test.cameraMonitor.entities.RecordedStream;
+import org.test.cameraMonitor.entities.*;
 import org.test.cameraMonitor.recordingEngine.IPCameraTest;
+import org.test.cameraMonitor.util.APIUtils;
+import org.test.cameraMonitor.util.ImageUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -43,13 +42,9 @@ public class StreamingUtils {
         long frameTime = 0;
         RecordedImage image = null;
         while ((iterator.hasNext())) {
-            if (image == null){
-                image = iterator.next();
-            }
-            byte[] imageData = iterator.next().getImageData();
+            Image i = iterator.next();
+            byte[] imageData = ImageUtils.putTimpStampOnImage(i, APIUtils.getTimestampFromLong(i.getDate())).getImageData();
             StreamingUtils.sendMJPEGFrame(responseOutputStream, imageData);
-            frameTime = image.getDate();
-            image = iterator.next();
             try {
                 Thread.sleep(1000 / Integer.parseInt(GlobalAttributes.getInstance().getConfigValue("FramesPerSecond")));
             } catch (InterruptedException e) {
@@ -72,15 +67,11 @@ public class StreamingUtils {
         long frameTime = 0;
         RecordedImage image = null;
         while ((iterator.hasNext())) {
-            if (image == null){
-                image = iterator.next();
-            }
-            byte[] imageData = iterator.next().getImageData();
+            Image i = iterator.next();
+            byte[] imageData = ImageUtils.putTimpStampOnImage(i, APIUtils.getTimestampFromLong(i.getDate())).getImageData();
             StreamingUtils.sendMJPEGFrame(responseOutputStream, imageData);
-            frameTime = image.getDate();
-            image = iterator.next();
             try {
-                Thread.sleep(image.getDate() - frameTime);
+                Thread.sleep(1000 / Integer.parseInt(GlobalAttributes.getInstance().getConfigValue("FramesPerSecond")));
             } catch (InterruptedException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }

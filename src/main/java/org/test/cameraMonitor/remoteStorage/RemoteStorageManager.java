@@ -2,6 +2,7 @@ package org.test.cameraMonitor.remoteStorage;
 
 import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.EventImage;
+import org.test.cameraMonitor.entities.Image;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ public interface RemoteStorageManager extends Runnable {
 
     public EventImage getRemoteCopyOfEventImage(EventImage image) throws IOException;
 
-    public ArrayList<EventImage> getAllImagesByEvent(Event event);
+    public ArrayList<Image> getAllImagesByEvent(Event event);
 
     public void closeConnection();
 }

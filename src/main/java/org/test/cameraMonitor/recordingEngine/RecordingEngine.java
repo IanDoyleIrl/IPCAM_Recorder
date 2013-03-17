@@ -12,9 +12,11 @@ import org.test.cameraMonitor.entities.Camera;
 import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.EventImage;
 import org.test.cameraMonitor.entities.RecordedImage;
+import org.test.cameraMonitor.util.DatabaseUtils;
 import org.test.cameraMonitor.util.HibernateUtil;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -61,6 +63,7 @@ public class RecordingEngine implements Runnable {
     @Override
     public void run(){
         try{
+            DatabaseUtils.cleanUpEventRecords();
 //            Properties properties = Properti
             logger.info("Starting run()");
             logger.error("error");
@@ -85,14 +88,25 @@ public class RecordingEngine implements Runnable {
         }
     }
 
+    private byte[] putTimpStampOnImage(RecordedImage i, BufferedImage bi) throws IOException {
+        Graphics2D graphics = bi.createGraphics();
+        Font font = new Font("ARIAL", Font.PLAIN, 20);
+        graphics.setFont(font);
+        graphics.drawString(String.valueOf(i.getDate()), 50, 50);
+        bi.flush();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ImageIO.createImageOutputStream(out);
+        return out.toByteArray();
+    }
+
     private void createAndSaveNewRecordedImage(MjpegFrame frame, Camera camera) throws IOException {
         System.out.println("createAndSaveNewRecordedImage() frameLength: " + frame.getBytes().length + ", camera: " + camera.getID());
         String dateTime = DateFormatUtils.format(new Date().getTime(), "HH:MM:ss:SSSS");
-        byte[] tempImage = (frame.getJpegBytes());
         RecordedImage rImg = new RecordedImage();
+        byte[] imageData = frame.getBytes();
         //rImg.setCamera(camera);
         rImg.setDate(System.currentTimeMillis());
-        rImg.setImageData(tempImage);
+        rImg.setImageData(frame.getBytes());
         rImg.save();
         compareCount ++;
         if (global.isEventTriggered() == true){
@@ -100,9 +114,9 @@ public class RecordingEngine implements Runnable {
         }
         if (compareCount > 10){
             if (originalCompareImage != null){
-                this.comparePreviousImageWithLatest(tempImage);
+                this.comparePreviousImageWithLatest(imageData);
             }
-            originalCompareImage = ImageIO.read(new ByteArrayInputStream(tempImage));
+            originalCompareImage = ImageIO.read(new ByteArrayInputStream(imageData));
             compareCount = 0;
             global.resetEventTimestamp();
         }
