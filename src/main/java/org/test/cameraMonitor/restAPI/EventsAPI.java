@@ -9,8 +9,11 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.EventImage;
+import org.test.cameraMonitor.entities.Image;
+import org.test.cameraMonitor.util.APIUtils;
 import org.test.cameraMonitor.util.EventUtils;
 import org.test.cameraMonitor.util.HibernateUtil;
+import org.test.cameraMonitor.util.ImageUtils;
 
 import javax.servlet.http.HttpServlet;
 import javax.ws.rs.*;
@@ -98,7 +101,8 @@ public class EventsAPI extends HttpServlet {
         maxQuery.setProjection( Projections.max( "Id" ) );
         Criteria query = HibernateUtil.getSessionFactory().openSession().createCriteria( EventImage.class );
         query.add( Property.forName("Id").eq(maxQuery) );
-        EventImage image = (EventImage) query.uniqueResult();
+        Image image = (EventImage) query.uniqueResult();
+        image = ImageUtils.putTimpStampOnImage(image, APIUtils.getTimestampFromLong(image.getDate()));
         if (image == null){
             throw new WebApplicationException(404);
         }

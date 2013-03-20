@@ -1,10 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html dir="ltr">
-
+<html >
 <head>
-    <script src="/js/dojo_static/dojo/dojo.js"
-            djConfig="parseOnLoad: true">
-    </script>
+
+    <link rel="stylesheet" href="/js/dojo_static/dijit/themes/claro/claro.css">
+    <style type="text/css">
+    html, body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+    }</style>
+    <script>dojoConfig = {parseOnLoad: true}</script><script src='/js/dojo_static/dojo/dojo.js'></script>
     <script type="text/javascript">
         dojo.registerModulePath("core", "/js");
         dojo.require("dijit.dijit");
@@ -18,22 +23,46 @@
         dojo.require("dojox.widget.Portlet");
         dojo.require("dojox.widget.Calendar");
         dojo.require("dijit.layout.AccordionContainer");
+        dojo.require("dojox.widget.Roller");
         dojo.require("core.streamingWidget");
         dojo.require("core.eventWidget");
-        //alert ("here");
+        dojo.require("core.cameraWidget");
+        dojo.require("core.recordingWidget");
+        dojo.require("core.settingsWidget");
+        dojo.require("core.notificationWidget");
     </script>
-    <link rel="stylesheet" type="text/css"
-          href="/js/dojo_static/dijit/themes/claro/claro.css" />
+    <script>
+        function initalizePage()
+        {
+            alert("Page is loaded");
+        }
+    </script>
+
 </head>
-
-<body class="claro ">
-<div dojoType="dijit.layout.ContentPane" id="sideLeft">
-    <div dojoType="core.eventWidget"></div>
+<body class="claro" onload="initalizePage()">
+<div data-dojo-type="dijit/layout/BorderContainer" style="width: 100%; height: 100%">
+    <div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'top'"><b>Current Status</b>
+        <div dojoType="core.notificationWidget"></div>
+    </div>
+    <div data-dojo-type="dijit/layout/AccordionContainer" data-dojo-props="region:'leading'">
+        <div data-dojo-type="dijit/layout/AccordionPane" title="Events">
+            <div dojoType="core.eventWidget"></div>
+        </div>
+        <div data-dojo-type="dijit/layout/AccordionPane" title="Recording">
+            <div dojoType="core.recordingWidget"></div>
+        </div>
+        <div data-dojo-type="dijit/layout/AccordionPane" title="Cameras">
+            <div dojoType="core.cameraWidget"></div>
+        </div>
+        <div data-dojo-type="dijit/layout/AccordionPane" title="Settings">
+            <div dojoType="core.settingsWidget"></div>
+        </div>
+    </div>
+    <div data-dojo-type="dijit/layout/TabContainer" data-dojo-props="region:'center'">
+        <div data-dojo-type="dijit/layout/ContentPane" title="Camera 1 - Sitting Room">
+            <div dojoType="core.streamingWidget"></div>
+        </div>
+    </div>
 </div>
-<div dojoType="dijit.layout.ContentPane" id="container">
-    <div dojoType="core.streamingWidget"></div>
-</div>
-
 </body>
-
 </html>

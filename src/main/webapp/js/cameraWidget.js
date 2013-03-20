@@ -1,5 +1,5 @@
 
-dojo.provide("core.eventWidget");
+dojo.provide("core.cameraWidget");
 
 dojo.require("dijit.form.Select");
 dojo.require("dijit.form.TextBox");
@@ -19,23 +19,35 @@ dojo.require("dijit.Menu");
 dojo.require("dijit.MenuItem");
 
 //Create our widget!
-dojo.declare('core.eventWidget', [dijit._Widget, dijit._Templated],{
+dojo.declare('core.cameraWidget', [dijit._Widget, dijit._Templated],{
     widgetsInTemplate : true,
-    templatePath: "js/htmlTemplates/eventWidget.html",
-    currentEvent : null,
+    templatePath: "js/htmlTemplates/cameraWidget.html",
+    currentEventId : null,
     eventStats : null,
+    recordingStats : null,
+    cameras : null,
     _this : null,
 
     postCreate : function(){
+        alert("camera");
         _this = this;
         this.populateVariables();
     },
 
     populateVariables : function (){
-        var statsArgs = {
+        var cameraArgs = {
+            url: "/api/camera",
+            handleAs: "json",
+            load: function(data){
+                _this.cameras = data;
+            },
+            error: function(error){
+                alert(error);
+            }
+        }
+        var eventArgs = {
             url: "/api/event/stats",
             handleAs: "json",
-            sync: true,
             load: function(data){
                 _this.eventStats = data;
             },
@@ -43,19 +55,21 @@ dojo.declare('core.eventWidget', [dijit._Widget, dijit._Templated],{
                 alert(error);
             }
         }
-        // Call the asynchronous xhrGet
-        dojo.xhrGet(statsArgs);
-        if (this.eventStats.currentEventId != null){
-            this.currentEvent = getEventByID(this.eventStats.currentEventId);
-        },
-
-        getEventByID : function (id){
-
-
+        var recordingArgs = {
+            url: "/api/recording/stats",
+            handleAs: "json",
+            load: function(data){
+                _this.recordingStats = data;
+            },
+            error: function(error){
+                alert(error);
+            }
         }
+        // Call the asynchronous xhrGet
+        dojo.xhrGet(cameraArgs);
+        dojo.xhrGet(eventArgs);
+        dojo.xhrGet(recordingArgs);
     }
-
-
 
 
 });

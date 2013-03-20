@@ -16,16 +16,19 @@ import java.util.Iterator;
  */
 public class CameraUtil {
 
-    public static JSONObject getCameraJSON(Camera camera){
+    public static JSONObject getCameraJSON(Camera camera, boolean withEvents){
         JSONObject response = new JSONObject();
         response.put("id", camera.getID());
         response.put("url", camera.getUrl());
-        JSONArray events = new JSONArray();
-        Iterator<Event> iterator = camera.getEvents().iterator();
-        while (iterator.hasNext()){
-            events.add(EventUtils.createEventJSON(iterator.next()));
+        response.put("active", camera.isActive());
+        if (withEvents){
+            JSONArray events = new JSONArray();
+            Iterator<Event> iterator = camera.getEvents().iterator();
+            while (iterator.hasNext()){
+                events.add(EventUtils.createEventJSON(iterator.next()));
+            }
+            response.put("events", events);
         }
-        response.put("events", events);
         return response;
     }
 

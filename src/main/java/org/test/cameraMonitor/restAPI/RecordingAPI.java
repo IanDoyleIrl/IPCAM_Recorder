@@ -5,12 +5,15 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Property;
 import org.json.simple.JSONObject;
+import org.test.cameraMonitor.constants.GlobalAttributes;
 import org.test.cameraMonitor.entities.Image;
 import org.test.cameraMonitor.entities.RecordedImage;
 import org.test.cameraMonitor.util.APIUtils;
+import org.test.cameraMonitor.util.DatabaseUtils;
 import org.test.cameraMonitor.util.HibernateUtil;
 import org.test.cameraMonitor.util.ImageUtils;
 
+import javax.persistence.Table;
 import javax.servlet.http.HttpServlet;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -60,11 +63,11 @@ public class RecordingAPI extends HttpServlet {
         maxQuery.setProjection( Projections.max( "Id" ) );
         Criteria query = HibernateUtil.getSessionFactory().openSession().createCriteria( RecordedImage.class );
         query.add( Property.forName("Id").eq(maxQuery) );
-        RecordedImage image = (RecordedImage) query.uniqueResult();
+        Image image = (Image) query.uniqueResult();
         if (image == null){
             throw new WebApplicationException(404);
         }
-        return Response.ok(image.getImageData()).build();
+        return Response.ok(ImageUtils.putTimpStampOnImage(image, APIUtils.getTimestampFromLong(image.getDate())).getImageData()).build();
     }
 
     @GET
@@ -94,11 +97,13 @@ public class RecordingAPI extends HttpServlet {
         long totalTimeInSeconds = (System.currentTimeMillis() - startTime)/ 1000;
         long averageFPS = totalImageCount / totalTimeInSeconds;
 
+
         JSONObject response = new JSONObject();
         response.put("totalImageCount", totalImageCount);
         response.put("maxId", maxId);
         response.put("startTime", startTime);
-        response.put("averageFPS", averageFPS);
+        response.put("FPS", GlobalAttributes.getInstance().getConfigValue("FramesPerSecond"));
+        response.put("tableSize", DatabaseUtils.getTableSizeByName(RecordedImage.class.getAnnotation(Table.class).name()));
         return Response.ok(response.toJSONString()).build();
 
     }

@@ -5,6 +5,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.test.cameraMonitor.entities.Event;
 
+import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.List;
 
@@ -18,9 +19,9 @@ import java.util.List;
 public class DatabaseUtils {
 
     public static void cleanUpEventRecords(){
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
         try {
-            Session session = HibernateUtil.getSessionFactory().openSession();
-            Transaction tx = session.beginTransaction();
             org.hibernate.Query globalQuery = session.createQuery
                     ("FROM Event");
             List<Event> list = globalQuery.list();
@@ -35,12 +36,22 @@ public class DatabaseUtils {
                     session.save(event);
                 }
             }
-            tx.commit();
-            session.close();
+
         }
         catch (Exception e){
             System.out.print(e);
         }
+        finally {
+            tx.commit();
+            session.close();
+        }
+    }
+
+    public static long getTableSizeByName(String name){
+        String sqlQuery = "SELECT round(((data_length + index_length) / 1024 / 1024),2) 'size'" +
+                            "FROM information_schema.TABLES WHERE table_schema = 'test' AND TABLE_NAME = :tableName";
+        BigDecimal result = (BigDecimal)HibernateUtil.getSessionFactory().openSession().createSQLQuery(sqlQuery).setParameter("tableName", name).uniqueResult();
+        return result.longValue();
     }
 
 }

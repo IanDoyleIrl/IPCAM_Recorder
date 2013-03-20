@@ -8,6 +8,9 @@ import org.test.cameraMonitor.entities.EventImage;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.zip.ZipEntry;
@@ -37,6 +40,13 @@ public class EventUtils {
             return null;
         }
     }
+
+    public static String convertTime(long time){
+        Date date = new Date(time);
+        Format format = new SimpleDateFormat("dd/MM/yyyy - HH:mm:ss");
+        return format.format(date).toString();
+    }
+
 
     public static JSONObject createEventJSON(Event event){
         JSONObject response = new JSONObject();
@@ -77,7 +87,7 @@ public class EventUtils {
         int totalEventImageCount = ((Long)HibernateUtil.getSessionFactory().openSession().createQuery("SELECT COUNT (id) FROM EventImage").uniqueResult()).intValue();
         long averageImagesPerEvent = 0;
         if (totalEventCount > 0 && totalEventImageCount > 0){
-            averageImagesPerEvent = totalEventCount / totalEventImageCount;
+            averageImagesPerEvent = totalEventImageCount / totalEventCount;
         }
         Event activeEvent = GlobalAttributes.getInstance().getCurrentEvent();
         long currentActiveEventId = 0;

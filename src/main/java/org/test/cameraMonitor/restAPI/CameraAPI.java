@@ -1,5 +1,6 @@
 package org.test.cameraMonitor.restAPI;
 
+import org.json.simple.JSONArray;
 import org.test.cameraMonitor.entities.Camera;
 import org.test.cameraMonitor.util.CameraUtil;
 import org.test.cameraMonitor.util.HibernateUtil;
@@ -10,6 +11,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -23,13 +26,25 @@ public class CameraAPI {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllCameras(){
+        List<Camera> cameras = HibernateUtil.getSessionFactory().openSession().createQuery("From Camera").list();
+        Iterator<Camera> cameraIterator = cameras.iterator();
+        JSONArray response = new JSONArray();
+        while (cameraIterator.hasNext()){
+            response.add(CameraUtil.getCameraJSON(cameraIterator.next(), false));
+        }
+        return Response.ok(response.toJSONString()).build();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
     public Response getCameraById(@PathParam("id") int id){
         Camera camera = (Camera)HibernateUtil.getSessionFactory().openSession().get(Camera.class, id);
         if (camera == null){
             return Response.status(404).build();
         }
-        return Response.ok(CameraUtil.getCameraJSON(camera).toJSONString()).build();
+        return Response.ok(CameraUtil.getCameraJSON(camera, true).toJSONString()).build();
     }
 
     @GET

@@ -19,7 +19,7 @@ import java.io.IOException;
 public class ImageUtils {
 
     public static Image putTimpStampOnImage(Image image, String timeStamp) throws IOException {
-        BufferedImage bi = ImageIO.read(new ByteArrayInputStream(image.getImageData()));
+        BufferedImage bi = ImageUtils.getBIFromImage(image);
         Graphics2D graphics = bi.createGraphics();
         Font font = new Font("ARIAL", Font.BOLD, 20);
         graphics.setFont(font);
@@ -31,6 +31,10 @@ public class ImageUtils {
         byte[] imageInByte = baos.toByteArray();
         image.setImageData(imageInByte);
         return image;
+    }
+
+    public static BufferedImage getBIFromImage(Image image) throws IOException {
+        return ImageIO.read(new ByteArrayInputStream(image.getImageData()));
     }
 
 }

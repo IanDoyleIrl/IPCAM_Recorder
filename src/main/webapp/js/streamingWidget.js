@@ -26,7 +26,7 @@ dojo.declare('core.streamingWidget', [dijit._Widget, dijit._Templated],{
     postCreate : function(){
         _this = this;
         var imgNode = dojo.byId("streamDiv")
-        imgNode.src = "/Videostream?mode=live";
+        imgNode.src = "/Videostream?mode=live&cameraId=1";
     }
 
 });
