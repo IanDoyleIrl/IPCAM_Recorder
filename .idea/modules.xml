@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/CamMonitorClient/CamMonitorClient.iml" filepath="$PROJECT_DIR$/CamMonitorClient/CamMonitorClient.iml" />
       <module fileurl="file://$PROJECT_DIR$/ZMAPI.iml" filepath="$PROJECT_DIR$/ZMAPI.iml" />
     </modules>
   </component>
