@@ -91,6 +91,11 @@
 	   <artifactId>tomcat-catalina</artifactId>
 	   <version>7.0.27</version>
         </dependency>
+        <dependency>
+	<groupId>org.apache.tomcat</groupId>
+	<artifactId>tomcat-coyote</artifactId>
+	<version>7.0.27</version>
+</dependency>
     </dependencies>
 
     <repositories>
