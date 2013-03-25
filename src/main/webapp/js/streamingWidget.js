@@ -29,4 +29,5 @@ dojo.declare('core.streamingWidget', [dijit._Widget, dijit._Templated],{
         imgNode.src = "/Videostream?mode=live&cameraId=1";
     }
 
+
 });

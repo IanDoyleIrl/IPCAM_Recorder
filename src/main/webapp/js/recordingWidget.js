@@ -29,7 +29,7 @@ dojo.declare('core.recordingWidget', [dijit._Widget, dijit._Templated],{
     _this : null,
 
     postCreate : function(){
-        alert("recording");
+        //alert("recording");
         _this = this;
         this.populateVariables();
     },

@@ -72,7 +72,7 @@ public class EventsAPI extends HttpServlet {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/stats")
     public Response getEventStatistics(@PathParam("id") int id) throws IOException {
-        JSONObject response = EventUtils.createEventStatisticsJSON();
+        JSONObject response = APIUtils.getEventStats();
         return Response.ok(response.toJSONString()).build();
     }
 

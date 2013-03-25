@@ -1,3 +1,35 @@
 <div>
-    <img id="eventDiv" />
+    <div data-dojo-type="dojox.layout.TableContainer" data-dojo-props="cols:2, customClass:'justLabels'" id="tc1">
+        <p3><b>Latest Event</b></p3>
+        <br>
+        <br>
+        <table data-dojo-attach-point="latestEventTable" style="display: table; border-collapse: collapse;">
+            <tr style="background-color: #D8D8D8; color: black;">
+                <td width="40%">ID:</td>
+                <td data-dojo-attach-point="latestId"></td>
+            </tr>
+           <tr>
+               <td width="40%">Name:</td>
+               <td data-dojo-attach-point="latestName"></td>
+           </tr>
+           <tr style="background-color: #D8D8D8; color: black;">
+               <td width="40%">Comments:</td>
+               <td data-dojo-attach-point="latestComments"></td>
+           </tr>
+           <tr>
+               <td width="40%">Status:</td>
+               <td data-dojo-attach-point="latestStatus"></td>
+           </tr>
+           <tr style="background-color: #D8D8D8; color: black;">
+               <td width="40%">Time Started:</td>
+               <td data-dojo-attach-point="latestStarted"></td>
+           </tr>
+           <tr>
+               <td width="40%">Time Ended:</td>
+               <td data-dojo-attach-point="latestEnded"></td>
+           </tr>
+        </table>
+        <br>
+        <p3><b>History</b></p3>
+    </div>
 </div>

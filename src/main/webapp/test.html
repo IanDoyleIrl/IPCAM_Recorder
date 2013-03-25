@@ -4,11 +4,14 @@
 
     <link rel="stylesheet" href="/js/dojo_static/dijit/themes/claro/claro.css">
     <style type="text/css">
-    html, body {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-    }</style>
+        html, body {
+            height: 100%;
+            width: 100%;
+            padding: 0;
+            border: 0;
+        }
+    </style>
+
     <script>dojoConfig = {parseOnLoad: true}</script><script src='/js/dojo_static/dojo/dojo.js'></script>
     <script type="text/javascript">
         dojo.registerModulePath("core", "/js");
@@ -30,21 +33,16 @@
         dojo.require("core.recordingWidget");
         dojo.require("core.settingsWidget");
         dojo.require("core.notificationWidget");
-    </script>
-    <script>
-        function initalizePage()
-        {
-            alert("Page is loaded");
-        }
+        dojo.require("dojox.socket");
     </script>
 
 </head>
-<body class="claro" onload="initalizePage()">
-<div data-dojo-type="dijit/layout/BorderContainer" style="width: 100%; height: 100%">
-    <div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'top'"><b>Current Status</b>
-        <div dojoType="core.notificationWidget"></div>
-    </div>
-    <div data-dojo-type="dijit/layout/AccordionContainer" data-dojo-props="region:'leading'">
+<body class="claro" _dijitmenusubmenu1="1" style="font-family: 'times'; font-size: 90%" onload="initalizePage()">
+<div id="main" data-dojo-type="dijit.layout.BorderContainer" data-dojo-props="liveSplitters:false, design:'sidebar'" class="dijitBorderContainer dijitContainer dijitLayoutContainer" widgetid="main" style="width: 100%; height: 100%; padding: 5px;">
+    <div data-dojo-type="dijit.layout.AccordionContainer" data-dojo-props="region:'leading', splitter:true, minSize:20"
+            style="width: 300px; overflow: hidden; left: 5px; top: 5px; position: absolute; height: 418px;" id="leftAccordion"
+            class="dijitAccordionContainer dijitContainer dijitLayoutContainer dijitBorderContainer-child dijitBorderContainer-dijitAccordionContainer dijitBorderContainerPane dijitAlignLeft"
+            role="tablist" widgetid="leftAccordion">
         <div data-dojo-type="dijit/layout/AccordionPane" title="Events">
             <div dojoType="core.eventWidget"></div>
         </div>
@@ -58,9 +56,14 @@
             <div dojoType="core.settingsWidget"></div>
         </div>
     </div>
-    <div data-dojo-type="dijit/layout/TabContainer" data-dojo-props="region:'center'">
-        <div data-dojo-type="dijit/layout/ContentPane" title="Camera 1 - Sitting Room">
-            <div dojoType="core.streamingWidget"></div>
+   <div>
+        <div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'top'">
+            <div dojoType="core.notificationWidget"></div>
+        </div>
+        <div data-dojo-type="dijit/layout/TabContainer" data-dojo-props="region:'center'" style="width: 60">
+            <div data-dojo-type="dijit/layout/ContentPane" title="Camera 1 - Sitting Room">
+                <div dojoType="core.streamingWidget"></div>
+            </div>
         </div>
     </div>
 </div>

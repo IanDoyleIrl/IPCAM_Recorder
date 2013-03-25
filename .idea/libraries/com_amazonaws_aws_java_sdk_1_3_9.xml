@@ -1,0 +1,16 @@
+<component name="libraryTable">
+  <library name="com.amazonaws:aws-java-sdk:1.3.9" type="repository">
+    <properties maven-id="com.amazonaws:aws-java-sdk:1.3.9" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/web/lib/aws-java-sdk-1.3.9.jar!/" />
+      <root url="jar://$PROJECT_DIR$/web/lib/commons-logging-1.1.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/web/lib/httpclient-4.2-beta1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/web/lib/httpcore-4.2-beta1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/web/lib/commons-codec-1.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/web/lib/jackson-core-asl-1.8.11.jar!/" />
+      <root url="jar://$PROJECT_DIR$/web/lib/jackson-mapper-asl-1.8.11.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

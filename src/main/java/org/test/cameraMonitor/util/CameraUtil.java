@@ -19,6 +19,7 @@ public class CameraUtil {
     public static JSONObject getCameraJSON(Camera camera, boolean withEvents){
         JSONObject response = new JSONObject();
         response.put("id", camera.getID());
+        response.put("name", camera.getName());
         response.put("url", camera.getUrl());
         response.put("active", camera.isActive());
         if (withEvents){

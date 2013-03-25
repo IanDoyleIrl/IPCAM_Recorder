@@ -82,25 +82,4 @@ public class EventUtils {
         return response;
     }
 
-    public static JSONObject createEventStatisticsJSON() {
-        int totalEventCount = ((Long) HibernateUtil.getSessionFactory().openSession().createQuery("SELECT COUNT (id) FROM Event").uniqueResult()).intValue();
-        int totalEventImageCount = ((Long)HibernateUtil.getSessionFactory().openSession().createQuery("SELECT COUNT (id) FROM EventImage").uniqueResult()).intValue();
-        long averageImagesPerEvent = 0;
-        if (totalEventCount > 0 && totalEventImageCount > 0){
-            averageImagesPerEvent = totalEventImageCount / totalEventCount;
-        }
-        Event activeEvent = GlobalAttributes.getInstance().getCurrentEvent();
-        long currentActiveEventId = 0;
-        if (activeEvent != null){
-            currentActiveEventId = activeEvent.getID();
-        }
-        JSONObject response = new JSONObject();
-        response.put("totalEventCount", totalEventCount);
-        response.put("totalEventImageCount", totalEventImageCount);
-        response.put("currentActiveEventId", currentActiveEventId);
-        response.put("isEventActive", (Boolean)GlobalAttributes.getInstance().isEventTriggered());
-        response.put("averageImagesPerEvent", averageImagesPerEvent);
-        response.put("lastEventTimestamp", GlobalAttributes.getInstance().getEventTimestamp());
-        return response;
-    }
 }

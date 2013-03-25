@@ -31,28 +31,50 @@ dojo.declare('core.eventWidget', [dijit._Widget, dijit._Templated],{
         this.populateVariables();
     },
 
+    convertDate : function(date){
+        var utcSeconds = 1234567890;
+        var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
+        d.setUTCSeconds(date);
+        return d.format("dddd, MMMM Do YYYY, h:mm:ss a");;
+    },
+
+    loadLatestEventTable : function(){
+        this.latestId.innerHTML = this.currentEvent.id;
+        this.latestName.innerHTML = this.currentEvent.name;
+        this.latestStarted.innerHTML = this.convertDate(this.currentEvent.timeStarted);
+        this.latestEnded.innerHTML = this.convertDate(this.currentEvent.timeEnded);
+        this.latestStatus.innerHTML = this.currentEvent.active;
+        this.latestComments.innerHTML = this.currentEvent.comments;
+    },
+
     populateVariables : function (){
-        var statsArgs = {
-            url: "/api/event/stats",
+        var eventArgs = {
+            url: "/api/event/latest",
             handleAs: "json",
-            sync: true,
+            load: dojo._base.lang.hitch(this, function(data){
+                this.currentEvent = data;
+                this.loadLatestEventTable();
+            }),
+            error: function(error){
+                alert(error);
+            }
+        }
+        dojo.xhrGet(eventArgs);
+    },
+
+    getEventByID : function (id){
+        var statsArgs = {
+            url: "/api/event/" + id,
+            handleAs: "json",
+            sync: false,
             load: function(data){
-                _this.eventStats = data;
+                _this.currentEvent = data;
             },
             error: function(error){
                 alert(error);
             }
         }
-        // Call the asynchronous xhrGet
         dojo.xhrGet(statsArgs);
-        if (this.eventStats.currentEventId != null){
-            this.currentEvent = getEventByID(this.eventStats.currentEventId);
-        },
-
-        getEventByID : function (id){
-
-
-        }
     }
 
 

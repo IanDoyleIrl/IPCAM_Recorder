@@ -29,7 +29,7 @@ dojo.declare('core.settingsWidget', [dijit._Widget, dijit._Templated],{
     _this : null,
 
     postCreate : function(){
-        alert("s");
+        //alert("s");
         _this = this;
         this.populateVariables();
     },

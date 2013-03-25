@@ -1,0 +1,8 @@
+<component name="libraryTable">
+  <library name="org.mortbay.jetty:jetty-util:7.0.0.pre5" type="repository">
+    <properties maven-id="org.mortbay.jetty:jetty-util:7.0.0.pre5" />
+    <CLASSES />
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

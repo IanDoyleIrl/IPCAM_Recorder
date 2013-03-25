@@ -8,6 +8,15 @@
     </listener>
 
     <servlet>
+        <servlet-name>RealtimeStream</servlet-name>
+        <servlet-class>org.test.cameraMonitor.websocket.RealtimeUpdateServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RealtimeStream</servlet-name>
+        <url-pattern>/RealtimeUpdate</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>Videostream</servlet-name>
         <servlet-class>org.test.cameraMonitor.streamingServer.StreamingServlet</servlet-class>
     </servlet>

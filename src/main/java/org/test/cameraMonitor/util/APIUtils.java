@@ -1,8 +1,16 @@
 package org.test.cameraMonitor.util;
 
+import org.hibernate.Criteria;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Property;
+import org.json.simple.JSONObject;
+import org.test.cameraMonitor.constants.GlobalAttributes;
+import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.Image;
 import org.test.cameraMonitor.entities.RecordedImage;
 
+import javax.persistence.Table;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -63,4 +71,94 @@ public abstract class APIUtils {
         return query.list();
     }
 
+    public static String getUpdateJSON() {
+        JSONObject response = new JSONObject();
+        response.put("latestEvent", APIUtils.getLatestEvent());
+        if (GlobalAttributes.getInstance().getCurrentEvent() == null){
+            response.put("activeRecording", false);
+        }
+        else{
+            response.put("activeRecording", true);
+        }
+        response.put("recordingStats", APIUtils.getRecordingStats());
+        response.put("eventStats", APIUtils.getEventStats());
+        return response.toJSONString();
+    }
+
+    public static JSONObject getEventStats() {
+        int totalEventCount = ((Long) HibernateUtil.getSessionFactory().openSession().createQuery("SELECT COUNT (id) FROM Event").uniqueResult()).intValue();
+        int totalEventImageCount = ((Long)HibernateUtil.getSessionFactory().openSession().createQuery("SELECT COUNT (id) FROM EventImage").uniqueResult()).intValue();
+        long averageImagesPerEvent = 0;
+        if (totalEventCount > 0 && totalEventImageCount > 0){
+            averageImagesPerEvent = totalEventImageCount / totalEventCount;
+        }
+        Event activeEvent = GlobalAttributes.getInstance().getCurrentEvent();
+        long currentActiveEventId = 0;
+        if (activeEvent != null){
+            currentActiveEventId = activeEvent.getID();
+        }
+        JSONObject response = new JSONObject();
+        response.put("totalEventCount", totalEventCount);
+        response.put("totalEventImageCount", totalEventImageCount);
+        response.put("currentActiveEventId", currentActiveEventId);
+        response.put("isEventActive", (Boolean)GlobalAttributes.getInstance().isEventTriggered());
+        response.put("averageImagesPerEvent", averageImagesPerEvent);
+        response.put("lastEventTimestamp", GlobalAttributes.getInstance().getEventTimestamp());
+        return response;
+    }
+
+    public static JSONObject getRecordingStats(){
+        int totalImageCount = ((Long)HibernateUtil.getSessionFactory().openSession().createQuery("SELECT COUNT (id) FROM RecordedImage").uniqueResult()).intValue();
+
+        DetachedCriteria detachedCriteria = null;
+        Criteria query = null;
+        RecordedImage image = null;
+
+        detachedCriteria = DetachedCriteria.forClass( RecordedImage.class );
+        detachedCriteria.setProjection( Projections.max( "Id" ) );
+        query = HibernateUtil.getSessionFactory().openSession().createCriteria( RecordedImage.class );
+        query.add( Property.forName("Id").eq( detachedCriteria ) );
+        image = (RecordedImage) query.uniqueResult();
+        int maxId = image.getId();
+
+        detachedCriteria = DetachedCriteria.forClass( RecordedImage.class );
+        detachedCriteria.setProjection( Projections.min( "Id" ) );
+        query = HibernateUtil.getSessionFactory().openSession().createCriteria( RecordedImage.class );
+        query.add( Property.forName("Id").eq( detachedCriteria ) );
+        image = (RecordedImage) query.uniqueResult();
+        long startTime = image.getDate();
+
+        long totalTimeInSeconds = (System.currentTimeMillis() - startTime)/ 1000;
+        long averageFPS = totalImageCount / totalTimeInSeconds;
+
+
+        JSONObject response = new JSONObject();
+        response.put("totalImageCount", totalImageCount);
+        response.put("maxId", maxId);
+        response.put("startTime", startTime);
+        response.put("FPS", GlobalAttributes.getInstance().getConfigValue("FramesPerSecond"));
+        response.put("tableSize", DatabaseUtils.getTableSizeByName(RecordedImage.class.getAnnotation(Table.class).name()));
+        return response;
+    }
+
+    public static JSONObject getLatestEvent(){
+        DetachedCriteria detachedCriteria = null;
+        Criteria query = null;
+        Event event = null;
+
+        detachedCriteria = DetachedCriteria.forClass( Event.class );
+        detachedCriteria.setProjection( Projections.max( "ID" ) );
+        query = HibernateUtil.getSessionFactory().openSession().createCriteria(Event.class);
+        query.add( Property.forName("ID").eq( detachedCriteria ) );
+        event = (Event) query.uniqueResult();
+
+        JSONObject response = new JSONObject();
+        if (event != null){
+            response = EventUtils.createEventJSON(event);
+            return response;
+        }
+        else{
+            return null;
+        }
+    }
 }

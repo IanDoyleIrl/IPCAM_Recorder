@@ -1,26 +1,53 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html >
 <head>
-    <title></title>
+
+    <link rel="stylesheet" href="/js/dojo_static/dijit/themes/claro/claro.css">
+    <style type="text/css">
+        html, body {
+            height: 100%;
+            width: 100%;
+            padding: 0;
+            border: 0;
+        }
+    </style>
+
+    <script>dojoConfig = {parseOnLoad: true}</script><script src='/js/dojo_static/dojo/dojo.js'></script>
+    <script type="text/javascript">
+        dojo.registerModulePath("core", "/js");
+        dojo.require("dijit.dijit");
+        dojo.require("dojox.widget.Portlet");
+        dojo.require("dojox.widget.FeedPortlet");
+        dojo.require("dojox.layout.GridContainer");
+        dojo.require("dojox.widget.Calendar");
+        dojo.require("dijit.layout.ContentPane");
+        dojo.require("dijit.layout.BorderContainer");
+        dojo.require("dijit.layout.TabContainer");
+        dojo.require("dojox.widget.Portlet");
+        dojo.require("dojox.widget.Calendar");
+        dojo.require("dijit.layout.AccordionContainer");
+        dojo.require("dojox.widget.Roller");
+        dojo.require("core.streamingWidget");
+        dojo.require("core.eventWidget");
+        dojo.require("core.cameraWidget");
+        dojo.require("core.recordingWidget");
+        dojo.require("core.settingsWidget");
+        dojo.require("core.notificationWidget");
+        dojo.require("dojox.socket");
+    </script>
+    <script>
+        function initalizePage()
+        {
+            var socket = dojox.socket({
+                url:"/test"
+            });
+            socket.onmessage = function(event) {
+                    alert(event.data);
+            }
+        }
+    </script>
+
 </head>
-<body>
-<table>
-    <tr>
-        <td><b>ID:</b></td>
-        <td></td>
-    </tr>
-    <tr>
-        <td><b>Name:</b></td>
-        <td></td>
-    </tr>
-    <tr>
-        <td><b>Comments:</b></td>
-        <td></td>
-    </tr>
-    <tr>
-        <td><b>Start Time:</b></td>
-        <td></td>
-    </tr>
-</table>
+<body class="claro" _dijitmenusubmenu1="1" style="font-family: 'times'; font-size: 90%" onload="initalizePage()">
 </body>
 </html>

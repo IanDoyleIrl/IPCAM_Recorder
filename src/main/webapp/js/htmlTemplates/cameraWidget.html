@@ -1,3 +1,42 @@
 <div>
-    <img id="eventDiv" />
+    <div style="height: 100%;">
+        <div style="height: 80%">
+        <table id="cameraTable" style="left: 5%; right: 5%; width: 90%">
+            <tr>
+                <td width="25%"><b>ID</b></td>
+                <td width="25%"><b>Name</b></td>
+                <td width="25%"><b>Active</b></td>
+                <td width="25%"><b>Edit</b></td>
+            </tr>
+        </table>
+        </div>
+        <div style="top: 90%">
+            <button data-dojo-attach-point="addCameraButton" data-dojo-type="dijit/form/Button" type="button">Add New Camera</button>
+        </div>
+    </div>
+    <div data-dojo-type="dijit/Dialog" data-dojo-attach-point="cameraDetailsDialog" data-dojo-id="cameraDetailsDialog" title="Update Camera">
+        <table class="dijitDialogPaneContentArea">
+            <tr>
+                <td><label for="idInput">ID:</label></td>
+                <td><input id="idInput" readonly=true data-dojo-type="dijit/form/TextBox"/></td>
+            </tr>
+            <tr>
+                <td><label for="nameInput">Name:</label></td>
+                <td><input id="nameInput" data-dojo-type="dijit/form/TextBox"/></td>
+            </tr>
+            <tr>
+                <td><label for="urlInput">URL:</label></td>
+                <td><input id="urlInput" data-dojo-type="dijit/form/TextBox"/></td>
+            </tr>
+            <tr>
+                <td><label for="activeInput">Active:</label></td>
+                <td><input id="activeInput" data-dojo-type="dijit/form/CheckBox"/></td>
+            </tr>
+        </table>
+
+        <div class="dijitDialogPaneActionBar">
+            <button dojoType="dijit.form.Button" data-dojo-attach-point="okButton" type="button" id="ok">OK</button>
+            <button dojoType="dijit.form.Button" type="button" onClick="cameraDetailsDialog.onCancel();" id="cancel">Cancel</button>
+        </div>
+    </div>
 </div>
