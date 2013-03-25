@@ -42,7 +42,6 @@ public class RealtimeUpdateServlet extends WebSocketServlet {
     private final Set<UpdateMessageInbound> connections =
             new CopyOnWriteArraySet<UpdateMessageInbound>();
 
-    @Override
     protected StreamInbound createWebSocketInbound(String subProtocol,
                                                    HttpServletRequest request) {
         return new UpdateMessageInbound(connectionIds.incrementAndGet());

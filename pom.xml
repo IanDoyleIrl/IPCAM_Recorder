@@ -88,17 +88,21 @@
         </dependency>
         <dependency>
             <groupId>org.apache.tomcat</groupId>
-	   <artifactId>tomcat-catalina</artifactId>
-	   <version>7.0.27</version>
+            <artifactId>tomcat-api</artifactId>
+            <version>7.0.37</version>
         </dependency>
         <dependency>
-	<groupId>org.apache.tomcat</groupId>
-	<artifactId>tomcat-coyote</artifactId>
-	<version>7.0.27</version>
-</dependency>
+            <groupId>org.apache.tomcat</groupId>
+            <artifactId>tomcat-coyote</artifactId>
+            <version>7.0.37</version>
+        </dependency>
     </dependencies>
 
     <repositories>
+        <repository>
+            <id>tomcat7</id>
+            <url>http://repo2.maven.org/maven2/org/apache/tomcat/</url>
+        </repository>
         <repository>
             <id>xuggle repo</id>
             <url>http://xuggle.googlecode.com/svn/trunk/repo/share/java/</url>
