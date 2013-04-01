@@ -1,28 +1,5 @@
 dojo.provide("core.cameraWidget");
 
-dojo.require("dijit.form.Select");
-dojo.require("dijit.form.TextBox");
-dojo.require("dojox.layout.TableContainer");
-dojo.require("dijit._Widget");
-dojo.require("dijit._Templated");
-dojo.require("dojox.data.CsvStore");
-dojo.require("dojox.grid.EnhancedGrid");
-dojo.require("dojo.data.ItemFileReadStore");
-dojo.require("dijit.dijit");
-dojo.require("dojox.layout.TableContainer");
-dojo.require("dijit.form.TextBox");
-dojo.require("dojox.socket"),
-dojo.require("dijit.form.NumberSpinner");
-dojo.require("dojox.grid.enhanced.plugins.NestedSorting");
-dojo.require("dojox.grid.enhanced.plugins.IndirectSelection");
-dojo.require("dijit.Menu");
-dojo.require("dijit.MenuItem");
-dojo.require("dijit.Editor");
-dojo.require("dojox.editor.plugins.TablePlugins");
-dojo.require("dojox.editor.plugins.ResizeTableColumn");
-dojo.require("dojo.on");
-dojo.require("dojo._base.lang")
-
 //Create our widget!
 dojo.declare('core.cameraWidget', [dijit._Widget, dijit._Templated, dijit._WidgetsInTemplateMixin],{
     widgetsInTemplate : true,
@@ -59,7 +36,7 @@ dojo.declare('core.cameraWidget', [dijit._Widget, dijit._Templated, dijit._Widge
                 _this.cameras = data;
             },
             error: function(error){
-                alert(error);
+                //alert(error);
             }
         }
         // Call the asynchronous xhrGet
@@ -79,7 +56,7 @@ dojo.declare('core.cameraWidget', [dijit._Widget, dijit._Templated, dijit._Widge
                         this.cameraDetailsDialog.hide();
                     }),
                     error: function(error){
-                        alert(error)
+                        //alert(error)
                     }
                 }
                 var deferred = dojo.rawXhrPost(xhrArgs);
@@ -94,7 +71,7 @@ dojo.declare('core.cameraWidget', [dijit._Widget, dijit._Templated, dijit._Widge
                         this.loadCameraDiv();
                     }),
                     error: function(error){
-                        alert(error);
+                       // alert(error);
                     }
                 }
                 var deferred = dojo.xhrPost(xhrArgs);

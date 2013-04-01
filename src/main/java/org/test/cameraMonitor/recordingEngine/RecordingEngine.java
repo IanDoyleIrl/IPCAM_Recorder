@@ -72,7 +72,7 @@ public class RecordingEngine implements Runnable {
             IPCameraTest in = new IPCameraTest(connection.getInputStream());
             while (running) {
                 MjpegFrame frame = in.readMjpegFrame();
-                createAndSaveNewRecordedImage(frame, camera);
+                //createAndSaveNewRecordedImage(frame, camera);
                 logger.info("sleeping.....");
                 Thread.sleep(1000 / framesPerSeconds);
             }

@@ -97,14 +97,14 @@ public abstract class APIUtils {
         if (activeEvent != null){
             currentActiveEventId = activeEvent.getID();
         }
-        JSONObject response = new JSONObject();
-        response.put("totalEventCount", totalEventCount);
-        response.put("totalEventImageCount", totalEventImageCount);
-        response.put("currentActiveEventId", currentActiveEventId);
-        response.put("isEventActive", (Boolean)GlobalAttributes.getInstance().isEventTriggered());
-        response.put("averageImagesPerEvent", averageImagesPerEvent);
-        response.put("lastEventTimestamp", GlobalAttributes.getInstance().getEventTimestamp());
-        return response;
+            JSONObject response = new JSONObject();
+            response.put("totalEventCount", totalEventCount);
+            response.put("totalEventImageCount", totalEventImageCount);
+            response.put("currentActiveEventId", currentActiveEventId);
+            response.put("isEventActive", (Boolean)GlobalAttributes.getInstance().isEventTriggered());
+            response.put("averageImagesPerEvent", averageImagesPerEvent);
+            response.put("lastEventTimestamp", GlobalAttributes.getInstance().getEventTimestamp());
+            return response;
     }
 
     public static JSONObject getRecordingStats(){
