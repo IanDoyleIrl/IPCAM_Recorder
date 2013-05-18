@@ -24,14 +24,14 @@ public class RecordingThreadManager implements ServletContextListener {
 
     final ExecutorService executor = Executors.newFixedThreadPool(3);
     Logger logger = LogManager.getLogger(RecordingThreadManager.class.getName());
-
+    final List<ThreadManagerInterface> tasks = new ArrayList<ThreadManagerInterface>();
 
     public void contextInitialized(ServletContextEvent sce) {
-        final List<Runnable> tasks = new ArrayList<Runnable>();
         tasks.add((new CameraMonitorThreadManager()));
         tasks.add(new AWS_S3StorageManager());
         tasks.add(new EmailManager());
-        for (Runnable c : tasks){
+        tasks.add(new DatabaseUtilManager());
+        for (ThreadManagerInterface c : tasks){
                 executor.execute(c);
         }
         System.out.println("Done");
@@ -40,7 +40,10 @@ public class RecordingThreadManager implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
         System.out.println("Shutdown called - killing all threads");
-        executor.shutdown();
+        for (ThreadManagerInterface t : tasks){
+            t.shutdownThread();
+        }
+        executor.shutdownNow();
     }
 
 

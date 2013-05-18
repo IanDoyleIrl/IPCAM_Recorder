@@ -3,6 +3,7 @@ package org.test.cameraMonitor.remoteStorage;
 import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.EventImage;
 import org.test.cameraMonitor.entities.Image;
+import org.test.cameraMonitor.recordingEngine.ThreadManagerInterface;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import java.util.ArrayList;
  * Time: 17:06
  * To change this template use File | Settings | File Templates.
  */
-public interface RemoteStorageManager extends Runnable {
+public interface RemoteStorageManager extends ThreadManagerInterface {
 
     public void uploadImageFromEvent(EventImage image);
 

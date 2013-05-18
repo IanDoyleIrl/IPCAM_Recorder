@@ -1,0 +1,6 @@
+{
+    "showAllLiveCamerasAtStartup": true,
+    "showInactiveCameras" : false,
+    "overrideDefaultCamera" : 1,
+    "liveViewMode" : "individual"
+}

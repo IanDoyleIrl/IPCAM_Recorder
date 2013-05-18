@@ -27,13 +27,13 @@ public class EventUtils {
 
     public static ZipOutputStream getZipFromEventImages(Set<EventImage> images){
         try{
-        Event rootEvent = images.iterator().next().getEvent();
-        ZipOutputStream zout = new ZipOutputStream(new ByteArrayOutputStream());
-        for (EventImage image : images){
-            zout.putNextEntry(new ZipEntry(String.valueOf(image.getDate())));
-            zout.write(image.getImageData(), 0, image.getImageData().length);
-            zout.closeEntry();
-        }
+            Event rootEvent = images.iterator().next().getEvent();
+            ZipOutputStream zout = new ZipOutputStream(new ByteArrayOutputStream());
+            for (EventImage image : images){
+                zout.putNextEntry(new ZipEntry(String.valueOf(image.getDate())));
+                zout.write(image.getImageData(), 0, image.getImageData().length);
+                zout.closeEntry();
+            }
             return zout;
         }
         catch (IOException e){
@@ -51,6 +51,7 @@ public class EventUtils {
     public static JSONObject createEventJSON(Event event){
         JSONObject response = new JSONObject();
         if (event != null){
+            response.put("type", "event");
             response.put("id", event.getID());
             response.put("timeStarted", event.getTimeStarted());
             if (event.getTimeEnded() != 0){
@@ -79,6 +80,14 @@ public class EventUtils {
 
             response.put("eventImages", eventImages);
         }
+        return response;
+    }
+
+    public static JSONObject getJSONFromEventStreamingData(EventStreamingData data){
+        JSONObject response = new JSONObject();
+        response.put("totalFrames", data.getTotalFrameCount());
+        response.put("currentFrame", data.getCurrentFrameCount());
+        response.put("readyToStream", data.isReadyToStream());
         return response;
     }
 

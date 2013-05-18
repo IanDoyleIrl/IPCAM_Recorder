@@ -56,10 +56,8 @@ public class RecordingEngine implements Runnable {
         this.running = false;
     }
 
-    @Override
-    public void run(){
-        try{
-            DatabaseUtils.cleanUpEventRecords();
+    public void connectToCamera() throws IOException, InterruptedException {
+        while (true){
             logger.info("Starting run()");
             logger.error("error");
             logger.trace("trace");
@@ -68,18 +66,36 @@ public class RecordingEngine implements Runnable {
             HttpURLConnection connection;
             URL cam = new URL(camera.getUrl());
             connection = (HttpURLConnection)cam.openConnection();
-            System.out.println(connection.getContentType());
+            connection.setConnectTimeout(3);
             IPCameraTest in = new IPCameraTest(connection.getInputStream());
             while (running) {
                 MjpegFrame frame = in.readMjpegFrame();
-                //createAndSaveNewRecordedImage(frame, camera);
+                createAndSaveNewRecordedImage(frame, camera);
                 logger.info("sleeping.....");
                 Thread.sleep(1000 / framesPerSeconds);
             }
-        } catch (EOFException eof) {
-            eof.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void run(){
+        while (running){
+            try {
+                connectToCamera();
+            }
+            catch (IOException ioExp){
+                System.out.println("IOException with camera: " + this.camera.getID());
+            }
+            catch (InterruptedException innExp){
+                System.out.println("IOException with camera: " + this.camera.getID());
+            }
+            finally {
+                try {
+                    Thread.sleep(60000);
+                } catch (InterruptedException e) {
+                    System.out.println("Thread exception with camera: " + this.camera.getID());
+                }
+            }
         }
     }
 
@@ -104,7 +120,7 @@ public class RecordingEngine implements Runnable {
         long timeStamp = global.getEventTimestamp();
         long diff = (currentTime - timeStamp) / 1000;
         int timeout = Integer.parseInt(global.getConfigValue("EventTimeout"));
-        System.out.println("Diff: " + diff + ", currentTime: " + System.currentTimeMillis() + ", eventTime: " + timeStamp);
+        //System.out.println("Diff: " + diff + ", currentTime: " + System.currentTimeMillis() + ", eventTime: " + timeStamp);
         Event currentEvent = global.getCurrentEvent();
         if (currentEvent != null & diff >= timeout){
             Transaction tx = null;

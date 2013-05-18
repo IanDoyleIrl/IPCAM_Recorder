@@ -1,16 +1,26 @@
 package org.test.cameraMonitor.streamingServer;
 
+import com.sun.xml.internal.messaging.saaj.util.ByteInputStream;
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import net.sf.jipcam.axis.MjpegFrame;
+import org.apache.commons.io.IOUtils;
+import org.hibernate.Criteria;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Property;
 import org.test.cameraMonitor.constants.GlobalAttributes;
 import org.test.cameraMonitor.entities.*;
 import org.test.cameraMonitor.recordingEngine.IPCameraTest;
 import org.test.cameraMonitor.util.APIUtils;
+import org.test.cameraMonitor.util.EventStreamingData;
+import org.test.cameraMonitor.util.HibernateUtil;
 import org.test.cameraMonitor.util.ImageUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.OutputStream;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Iterator;
@@ -55,8 +65,8 @@ public class StreamingUtils {
 
     public static void handleEventStreaming (HttpServletResponse response, HttpServletRequest request, Event event) throws IOException {
         //response.setContentLength((int) pdfFile.length());
-        List streamData = event.getStream();
-        Iterator<RecordedImage> iterator = streamData.iterator();
+        EventStreamingData handler = new EventStreamingData(event);
+        GlobalAttributes.getInstance().getEventStreamingDataHashMap().put(event, handler);
         String boundry = "--myboundary";
         String empty = "\r\n";
         byte[] b = boundry.getBytes();
@@ -66,6 +76,12 @@ public class StreamingUtils {
         responseOutputStream.flush();
         long frameTime = 0;
         RecordedImage image = null;
+        List streamData = event.getStream();
+        Iterator<RecordedImage> iterator = streamData.iterator();
+        handler.setCurrentFrameCount(0);
+        handler.setTotalFrameCount(streamData.size());
+        handler.setReadyToStream(true);
+        handler.update();
         while ((iterator.hasNext())) {
             Image i = iterator.next();
             byte[] imageData = ImageUtils.putTimpStampOnImage(i, APIUtils.getTimestampFromLong(i.getDate())).getImageData();
@@ -75,25 +91,33 @@ public class StreamingUtils {
             } catch (InterruptedException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
+            handler.setCurrentFrameCount(handler.getCurrentFrameCount() + 1);
+            handler.update();
         }
+        handler.setReadyToStream(false);
+        handler.update();
+        GlobalAttributes.getInstance().getEventStreamingDataHashMap().remove(event);
     }
 
     public static void handleLiveStreaming(HttpServletResponse response, HttpServletRequest request, Camera camera) throws IOException, InterruptedException {
-        boolean firstTime = true;
-        HttpURLConnection connection;
-        URL cam = new URL(camera.getUrl());
-        connection = (HttpURLConnection)cam.openConnection();
-        IPCameraTest in = new IPCameraTest(connection.getInputStream());
+        String boundry = "--myboundary";
+        String empty = "\r\n";
+        byte[] b = boundry.getBytes();
+        //FileInputStream fileInputStream = new FileInputStream(pdfFile);
         OutputStream responseOutputStream = response.getOutputStream();
         response.setContentType("multipart/x-mixed-replace; boundary=--myboundary");
         responseOutputStream.flush();
-        MjpegFrame frame = null;
-        while ((frame = in.readMjpegFrame()) != null) {
-            //System.out.println("FRM: " + frame.getJpegBytes().length);
-            //System.out.println("OUT: " + frame.getBytes().length);
-            sendMJPEGFrame(responseOutputStream, frame.getJpegBytes());
-            Thread.sleep(1000 / Integer.parseInt(GlobalAttributes.getInstance().getConfigValue("FramesPerSecond")));
-
+        long frameTime = 0;
+        RecordedImage image = null;
+        while (true) {
+            DetachedCriteria maxQuery = DetachedCriteria.forClass( RecordedImage.class );
+            maxQuery.setProjection( Projections.max("Id") );
+            Criteria query = HibernateUtil.getSessionFactory().openSession().createCriteria( RecordedImage.class );
+            query.add( Property.forName("Id").eq(maxQuery) );
+            image = (RecordedImage) query.uniqueResult();
+            byte[] imageData = ImageUtils.putTimpStampOnImage(image, APIUtils.getTimestampFromLong(image.getDate())).getImageData();
+            sendMJPEGFrame(response.getOutputStream(), imageData);
+            Thread.sleep(1000000);
         }
     }
 
@@ -107,6 +131,24 @@ public class StreamingUtils {
         responseOutputStream.write(("\r\n").getBytes());
         responseOutputStream.write(("\r\n").getBytes());
         responseOutputStream.write(imageData);
+        responseOutputStream.write(b);
+        responseOutputStream.flush();
+    }
+
+
+    private static void sendLoadingMJPEGFrame(OutputStream responseOutputStream) throws IOException{
+        File loadingImage = new File("/Users/Ian/Downloads/loading.gif");
+        FileInputStream stream = new FileInputStream(loadingImage);
+        boolean test = loadingImage.canRead();
+        byte[] data = IOUtils.toByteArray(stream);
+        responseOutputStream.write(("--myboundary").getBytes());
+        responseOutputStream.write(("\r\n").getBytes());
+        responseOutputStream.write(("Content-Type:image/jpeg").getBytes());
+        responseOutputStream.write(("\r\n").getBytes());
+        responseOutputStream.write(("Content-Length:" + data.length).getBytes());
+        responseOutputStream.write(("\r\n").getBytes());
+        responseOutputStream.write(("\r\n").getBytes());
+        responseOutputStream.write(data);
         responseOutputStream.write(b);
         responseOutputStream.flush();
     }

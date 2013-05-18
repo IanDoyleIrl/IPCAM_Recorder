@@ -15,13 +15,18 @@ import java.util.concurrent.Executors;
  * Time: 22:45
  * To change this template use File | Settings | File Templates.
  */
-public class CameraMonitorThreadManager implements Runnable{
+public class CameraMonitorThreadManager implements ThreadManagerInterface {
 
     HashMap<Integer, RecordingEngine> runningThreads = new HashMap<Integer, RecordingEngine>();
+    private boolean running = true;
+
+    public void shutdownThread(){
+        this.running = false;
+    }
 
     @Override
     public void run() {
-        while (true){
+        while (running){
             List<Camera> cameras = HibernateUtil.getSessionFactory().openSession().createQuery("FROM Camera").list();
             for (Camera c : cameras){
                 if (c.isActive() && !runningThreads.containsKey(c.getID())){

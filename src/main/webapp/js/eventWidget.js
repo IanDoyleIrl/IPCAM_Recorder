@@ -3,6 +3,7 @@ dojo.provide("core.eventWidget");
 
 //Create our widget!
 dojo.declare('core.eventWidget', [dijit._Widget, dijit._Templated],{
+
     widgetsInTemplate : true,
     templatePath: "js/htmlTemplates/eventWidget.html",
     currentEvent : null,
@@ -10,12 +11,14 @@ dojo.declare('core.eventWidget', [dijit._Widget, dijit._Templated],{
     eventThis : null,
     eventTypeDropdown : null,
     eventPeriodDropdown : null,
+    eventTableWidget : null,
 
 
     postCreate : function(){
         eventThis = this;
         this.populateVariables();
         this.loadEventDropdowns();
+        this.eventTableWidget = new core.eventDetailsTableWidget({event : null}, this.eventTable);
     },
 
     getHoursFromDropdowns : function(){
@@ -73,6 +76,7 @@ dojo.declare('core.eventWidget', [dijit._Widget, dijit._Templated],{
     },
 
     handleEventHistorySelection : function(evt){
+        console.log("click");
         var event = evt.currentTarget.event;
         var row = evt.currentTarget;
         var selectedStyle =
@@ -102,6 +106,13 @@ dojo.declare('core.eventWidget', [dijit._Widget, dijit._Templated],{
             eventThis.updateEventDetailsPane(event);
         }
         if (evt.type == "click"){
+            //_tabManager.addNewTab(event);
+            eventThis.currentEvent = event;
+            eventThis.clearTableHighlights(dojo.byId("eventHistoryTable"), nonSelectedStyle);
+            dojo.style(row, selectedStyle);
+        }
+        if (evt.type == "dblclick"){
+            _tabManager.addNewTab(event);
             eventThis.currentEvent = event;
             eventThis.clearTableHighlights(dojo.byId("eventHistoryTable"), nonSelectedStyle);
             dojo.style(row, selectedStyle);
@@ -112,7 +123,7 @@ dojo.declare('core.eventWidget', [dijit._Widget, dijit._Templated],{
         var table = dojo.byId("eventHistoryTable");
         var row = table.insertRow(table.rows.length);
         row.event = event;
-        dojo.on(row, "mouseover, click, mouseout", dojo._base.lang.hitch(this, function(evt){
+        dojo.on(row, "mouseover, click, mouseout, dblclick", dojo._base.lang.hitch(this, function(evt){
             eventThis.handleEventHistorySelection(evt);
         }));
         var name = row.insertCell(0);
@@ -206,14 +217,9 @@ dojo.declare('core.eventWidget', [dijit._Widget, dijit._Templated],{
         }
     },
 
-    updateEventDetailsPane : function(event){
-        //eventThis.eventDetailsTitle.innerHTML = event.name;
-        eventThis.latestId.innerHTML = event.id;
-        eventThis.latestName.innerHTML = event.name;
-        eventThis.latestStarted.innerHTML = eventThis.convertDate(event.timeStarted, false);
-        eventThis.latestEnded.innerHTML = eventThis.convertDate(event.timeEnded, false);
-        eventThis.latestStatus.innerHTML = event.active;
-        eventThis.latestComments.innerHTML = event.comments;
+    updateEventDetailsPane : function(evt){
+        this.eventTableWidget.event = evt;
+        this.eventTableWidget.update();
     },
 
     populateVariables : function (){

@@ -3,6 +3,7 @@ package org.test.cameraMonitor.constants;
 import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.EventImage;
 import org.test.cameraMonitor.remoteStorage.AWS_S3StorageManager;
+import org.test.cameraMonitor.util.EventStreamingData;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +22,7 @@ public class GlobalAttributes {
     private static GlobalAttributes ourInstance = new GlobalAttributes();
     private AWS_S3StorageManager s3StorageManager;
     private HashMap<String, String> configValues = new HashMap<String, String>();
+    private java.util.Hashtable<Event, EventStreamingData> eventStreamingDataHashMap = new java.util.Hashtable<Event, EventStreamingData>();
     private ConcurrentLinkedQueue<EventImage> S3Queue = new ConcurrentLinkedQueue<EventImage>();
     private ConcurrentLinkedQueue<Event> emailQueue = new ConcurrentLinkedQueue<Event>();
     private boolean eventTriggered = false;
@@ -89,6 +91,11 @@ public class GlobalAttributes {
 
     public AWS_S3StorageManager getS3StorageManager(){
         return this.s3StorageManager;
+    }
+
+    synchronized
+    public java.util.Hashtable<Event, EventStreamingData> getEventStreamingDataHashMap() {
+        return eventStreamingDataHashMap;
     }
 }
 

@@ -1,8 +1,13 @@
 package org.test.cameraMonitor.entities;
 
+import org.test.cameraMonitor.recordingEngine.IPCameraTest;
 import org.test.cameraMonitor.util.ControlUtils;
 
 import javax.persistence.*;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -96,5 +101,29 @@ public class Camera {
 
     public boolean handleMovement(String controlOption) {
         return ControlUtils.sendControlCommand(this, this.controlUrls.get("up"));
+    }
+
+    public Exception isContactable(){
+        HttpURLConnection connection = null;
+        try{
+            URL cam = new URL(this.getUrl());
+            connection = (HttpURLConnection)cam.openConnection();
+            IPCameraTest in = new IPCameraTest(connection.getInputStream());
+        }
+        catch(MalformedURLException malEx){
+            return new MalformedURLException("Url not valid");
+        }
+        catch (IOException e) {
+            return new MalformedURLException("Connection error");
+        }
+        finally {
+            try{
+                connection.disconnect();
+            }
+            catch(NullPointerException npEx){
+
+            }
+        }
+        return null;
     }
 }

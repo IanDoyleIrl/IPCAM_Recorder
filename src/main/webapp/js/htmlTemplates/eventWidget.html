@@ -1,37 +1,6 @@
 <div>
-    <div data-dojo-type="dojox.layout.TableContainer" data-dojo-props="cols:2, customClass:'justLabels'" id="tc1">
-        <p3 data-dojo-attach-point="eventDetailsTitle"><b>Event Details</b></p3>
+        <div data-dojo-attach-point="eventTable"></div>
         <br>
-        <br>
-        <div data-dojo-type="dijit.layout.ContentPane" style="border-style:solid; border-width:2px; border-color: rgb(190, 199, 236); padding: 10px">
-            <table data-dojo-attach-point="latestEventTable" style="width: 100%; display: table; border-collapse: collapse;">
-                <tr>
-                    <td width="40%"><b>ID:</b></td>
-                    <td data-dojo-attach-point="latestId"></td>
-                </tr>
-                <tr>
-                    <td width="40%"><b>Name:</b></td>
-                    <td data-dojo-attach-point="latestName"></td>
-                </tr>
-                <tr>
-                    <td width="40%"><b>Comments:</b></td>
-                    <td data-dojo-attach-point="latestComments"></td>
-                </tr>
-                <tr>
-                    <td width="40%"><b>Status:</b></td>
-                    <td data-dojo-attach-point="latestStatus"></td>
-                </tr>
-                <tr>
-                    <td width="40%"><b>Started:</b></td>
-                    <td data-dojo-attach-point="latestStarted"></td>
-                </tr>
-                <tr>
-                    <td width="40%"><b>Ended:</b></td>
-                    <td data-dojo-attach-point="latestEnded"></td>
-                </tr>
-            </table>
-            <br>
-        </div>
         <br>
         <p3><b>History</b></p3>
         <br>
@@ -56,5 +25,4 @@
                 <center><p4>No Results</p4></center>
             </div>
         </div>
-    </div>
 </div>

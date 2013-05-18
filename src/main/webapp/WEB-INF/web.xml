@@ -9,11 +9,20 @@
 
     <servlet>
         <servlet-name>RealtimeStream</servlet-name>
-        <servlet-class>org.test.cameraMonitor.websocket.RealtimeUpdateServlet</servlet-class>
+        <servlet-class>org.test.cameraMonitor.websocket.StreamingHandlerServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>RealtimeStream</servlet-name>
         <url-pattern>/RealtimeUpdate</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>StreamingHandler</servlet-name>
+        <servlet-class>org.test.cameraMonitor.websocket.StreamingHandlerServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>StreamingHandler</servlet-name>
+        <url-pattern>/StreamingHandler</url-pattern>
     </servlet-mapping>
 
     <servlet>

@@ -3,6 +3,7 @@ package org.test.cameraMonitor.emailEngine;
 import org.test.cameraMonitor.constants.GlobalAttributes;
 import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.EventImage;
+import org.test.cameraMonitor.recordingEngine.ThreadManagerInterface;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -21,11 +22,18 @@ import java.util.Properties;
  * Time: 18:30
  * To change this template use File | Settings | File Templates.
  */
-public class EmailManager implements Runnable {
+public class EmailManager implements ThreadManagerInterface {
+
+    private boolean running = true;
+
+    @Override
+    public void shutdownThread(){
+        this.running = false;
+    }
 
     @Override
     public void run() {
-        while (true){
+        while (running){
             try{
                 if (!GlobalAttributes.getInstance().getEmailQueue().isEmpty()){
                     Event event = GlobalAttributes.getInstance().getEmailQueue().remove();

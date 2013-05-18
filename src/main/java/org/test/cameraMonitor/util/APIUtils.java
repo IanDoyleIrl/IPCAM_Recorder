@@ -133,6 +133,7 @@ public abstract class APIUtils {
 
 
         JSONObject response = new JSONObject();
+        response.put("type", "recordingStats");
         response.put("totalImageCount", totalImageCount);
         response.put("maxId", maxId);
         response.put("startTime", startTime);

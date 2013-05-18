@@ -38,7 +38,7 @@ public class CameraAPI {
         Iterator<Camera> cameraIterator = cameras.iterator();
         JSONArray response = new JSONArray();
         while (cameraIterator.hasNext()){
-            response.add(CameraUtil.getCameraJSON(cameraIterator.next(), false));
+            response.add(CameraUtil.getCameraJSON(cameraIterator.next(), false, false));
         }
         return Response.ok(response.toJSONString()).build();
     }
@@ -50,7 +50,7 @@ public class CameraAPI {
         Iterator<Camera> cameraIterator = cameras.iterator();
         JSONArray response = new JSONArray();
         while (cameraIterator.hasNext()){
-            response.add(CameraUtil.getCameraJSON(cameraIterator.next(), false));
+            response.add(CameraUtil.getCameraJSON(cameraIterator.next(), false, false));
         }
         return Response.ok(response.toJSONString()).build();
     }
@@ -58,18 +58,18 @@ public class CameraAPI {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
-    public Response getCameraById(@PathParam("id") int id){
+    public Response getCameraById(@PathParam("id") int id, @QueryParam("showEvents") boolean showEvents, @QueryParam("showConnectionStatus") boolean showConnectionStatus ){
         Camera camera = (Camera)HibernateUtil.getSessionFactory().openSession().get(Camera.class, id);
         if (camera == null){
             return Response.status(404).build();
         }
-        return Response.ok(CameraUtil.getCameraJSON(camera, true).toJSONString()).build();
+        return Response.ok(CameraUtil.getCameraJSON(camera, showEvents, showConnectionStatus).toJSONString()).build();
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/control/{controlOption}")
-    public Response getCameraById(@PathParam("id") int id, @PathParam("controlOption") String controlOption){
+    public Response getCameraControlById(@PathParam("id") int id, @PathParam("controlOption") String controlOption){
         Camera camera = (Camera)HibernateUtil.getSessionFactory().openSession().get(Camera.class, id);
         boolean result = camera.handleMovement(controlOption);
         if (!result){

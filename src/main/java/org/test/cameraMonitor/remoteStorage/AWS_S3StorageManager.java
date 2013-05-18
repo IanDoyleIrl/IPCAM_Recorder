@@ -33,6 +33,12 @@ public class AWS_S3StorageManager implements RemoteStorageManager {
     String secretKey;
     String regionID;
     Bucket root;
+    private boolean running = true;
+
+    @Override
+    public void shutdownThread(){
+        this.running = false;
+    }
 
     public AWS_S3StorageManager(){
         this.createConnection();
@@ -142,7 +148,7 @@ public class AWS_S3StorageManager implements RemoteStorageManager {
     @Override
     public void run() {
         GlobalAttributes.getInstance().setS3StorageManager(this);
-        while (true){
+        while (running){
             try{
                 if (!GlobalAttributes.getInstance().getS3Queue().isEmpty()){
                     EventImage eventImage = GlobalAttributes.getInstance().getS3Queue().remove();

@@ -16,14 +16,17 @@
     <script src='/js/dojo_static/dojo/dojo.js'></script>
     <script src='https://raw.github.com/timrwood/moment/2.0.0/min/moment.min.js'></script>
     <script type="text/javascript">
-        debugger;
+        //debugger;
         dojo.registerModulePath("core", "/js");
+        //debugger;
+        dojo.require("dijit.place")
         dojo.require("dojo.dom-style");
         dojo.require("dijit.dijit");
         dojo.require("dijit._Widget");
         dojo.require("dojo.store.Memory");
         dojo.require("dijit.form.ComboBox");
         dojo.require("dijit._Templated");
+        dojo.require("dojox.layout.TableContainer");
         dojo.require("dojox.widget.Portlet");
         dojo.require("dojox.widget.FeedPortlet");
         dojo.require("dojox.layout.GridContainer");
@@ -35,12 +38,17 @@
         dojo.require("dojox.widget.Calendar");
         dojo.require("dijit.layout.AccordionContainer");
         dojo.require("dojox.widget.Roller");
+        dojo.require("core.globalFunctionality");
+        dojo.require("core.eventDetailsTableWidget");
         dojo.require("core.streamingWidget");
         dojo.require("core.eventWidget");
         dojo.require("core.cameraWidget");
         dojo.require("core.recordingWidget");
         dojo.require("core.settingsWidget");
         dojo.require("core.notificationWidget");
+        dojo.require("core.globalFunctionality");
+        dojo.require("core.tabManager");
+        dojo.require("core.streamingHandlerWidget");
         dojo.require("dojo.on");
         dojo.require("dojo._base.lang")
         dojo.require("dojox.socket");
@@ -68,12 +76,9 @@
     </div>
    <div>
         <div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'top'">
-
+            <div data-dojo-type="core.notificationWidget"></div>
         </div>
-        <div data-dojo-type="dijit/layout/TabContainer" data-dojo-props="region:'center'" style="width: 60">
-            <div data-dojo-type="dijit/layout/ContentPane" title="Camera 1 - Sitting Room">
-                <div dojoType="core.streamingWidget"></div>
-            </div>
+        <div dojoType="core.tabManager" data-dojo-props="region:'center', overrideDefaultCamera: false, presentationMode: 'windowed'" style="width: 60">
         </div>
     </div>
 </div>

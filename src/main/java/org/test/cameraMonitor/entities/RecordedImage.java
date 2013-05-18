@@ -17,4 +17,9 @@ public class RecordedImage extends Image {
     public RecordedImage() {
         super();
     }
+
+    public RecordedImage(byte[] info){
+        super();
+        this.setImageData(info);
+    }
 }
