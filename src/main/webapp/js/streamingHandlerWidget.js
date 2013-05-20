@@ -13,13 +13,13 @@ dojo.declare('core.streamingHandlerWidget', [dijit._Widget],{
         this.socket = dojox.socket({
             url: "/StreamingHandler"
         })
-
+        dojo._base.lang.hitch(this, this.socket.on("message", dojo._base.lang.hitch(this, function(event){
+            dojo._base.lang.hitch(this.handleStreamUpdate(event));
+        })));
         dojo._base.lang.hitch(this, this.socket.on("open", dojo._base.lang.hitch(this, function(event){
             this.socket.send(this.event.id);
         })));
-        dojo._base.lang.hitch(this, this.socket.on("message", dojo._base.lang.hitch(this, function(event){
-            dojo._base.lang.hitch(this.streamingWidget, this.handleStreamUpdate(event));
-        })));
+
     },
 
     handleStreamUpdate : function (feed){

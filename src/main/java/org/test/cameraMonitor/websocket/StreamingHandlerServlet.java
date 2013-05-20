@@ -43,14 +43,16 @@ public class StreamingHandlerServlet extends WebSocketServlet {
 
     protected StreamInbound createWebSocketInbound(String subProtocol,
                                                    HttpServletRequest request) {
-        return new StreamHandlerMessageInbound();
+        String id = request.getParameter("streamId");
+        return new StreamHandlerMessageInbound(id);
     }
 
     public final class StreamHandlerMessageInbound extends MessageInbound {
 
-        private Event event;
+        StreamingHandlerEngine engine;
 
-        private StreamHandlerMessageInbound() {
+        public StreamHandlerMessageInbound(String streamId) {
+            this.engine = new StreamingHandlerEngine(this, streamId);
         }
 
         @Override
@@ -71,8 +73,7 @@ public class StreamingHandlerServlet extends WebSocketServlet {
 
         @Override
         protected void onTextMessage(CharBuffer message) throws IOException {
-            event = HibernateUtil.getEventFromId(Integer.parseInt(message.toString()));
-            new StreamingHandlerEngine(this, event);
+            engine.handleClientUpdate(message);
         }
 
         public void broadcast(String message) {

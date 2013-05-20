@@ -24,7 +24,7 @@ dojo.declare('core.tabManager', [dijit._Widget, dijit.layout.TabContainer, core.
             for(var i=0; i<this.cameras.length; i++) {
                 if (this.cameras[i].active == true){
                     if (this.presentationMode == "windowed"){
-                        this._createOrUpdateTab(this.cameras[i]);
+                        //this._createOrUpdateTab(this.cameras[i]);
                     }
                 }
             }

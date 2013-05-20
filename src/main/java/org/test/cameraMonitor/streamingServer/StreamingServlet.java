@@ -17,6 +17,7 @@ package org.test.cameraMonitor.streamingServer; /**
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+import org.test.cameraMonitor.constants.GlobalAttributes;
 import org.test.cameraMonitor.entities.Camera;
 import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.RecordedStream;
@@ -69,10 +70,14 @@ public class StreamingServlet extends HttpServlet {
                 }
             }
             if (streamingMode.equals("event")){
-                String eventId = request.getParameter("eventId");
-                Event event = (Event) HibernateUtil.getSessionFactory().openSession().get(Event.class, Integer.parseInt(eventId));
-                if (event != null){
-                    StreamingUtils.handleEventStreaming(response, request, event);
+                String streamId = request.getParameter("streamId");
+                EventStream stream = GlobalAttributes.getInstance().getEventStreamTable().get(streamId);
+                if (stream != null){
+                    stream.setResponse(response);
+                    stream.setRequest(request);
+                    while (stream.isRunning()){
+
+                    }
                 }
                 else{
                     response.setStatus(404);

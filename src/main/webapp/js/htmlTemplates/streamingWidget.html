@@ -1,11 +1,18 @@
 <div>
     <table>
         <tr>
-            <td style="float: left; width: 700px; height: 500px;">
-                <img data-dojo-attach-point="loadingImg" id="loadingImg" src="/images/loading.gif" style="top: 30%; display: inline">
-                <img data-dojo-attach-point="streamDiv" id="streamDiv" style="display: none"/>
+            <td style="float: left; width: 700px; height: 500px; z-index: 9000">
+                <img data-dojo-attach-point="loadingImg" id="loadingImg" src="/images/loading.gif" style="position: relative; top: 50%; left: 50%; display: inline">
+                <img data-dojo-attach-point="streamDiv" id="streamDiv" style="display: none; width: 100%; height: 100%"/>
+                <div data-dojo-attach-point="progressDiv" style="display: none; top: 90%; width: 100%"></div>
+                <div data-dojo-attach-point="videoControls" style="text-align: center; position: relative; z-index: 9999">
+                    <div data-dojo-attach-point="PausePlayButton"></div>
+                    <div data-dojo-attach-point="FFButton"></div>
+                    <div data-dojo-attach-point="RWButton"></div>
+                    <div data-dojo-attach-point="DownloadButton"></div>
+                </div>
             </td>
-            <td style="width: auto; height: 100%; vertical-align: top">
+            <td style="width: auto; height: 100%; vertical-align: top;">
                 <div data-dojo-attach-point="eventTable">
                 </div>
                 <br>

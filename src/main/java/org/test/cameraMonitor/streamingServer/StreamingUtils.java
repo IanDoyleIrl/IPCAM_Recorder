@@ -8,6 +8,7 @@ import org.hibernate.Criteria;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Property;
+import org.json.simple.JSONObject;
 import org.test.cameraMonitor.constants.GlobalAttributes;
 import org.test.cameraMonitor.entities.*;
 import org.test.cameraMonitor.recordingEngine.IPCameraTest;
@@ -25,6 +26,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created with IntelliJ IDEA.
@@ -37,6 +39,20 @@ public class StreamingUtils {
 
     private static final String boundry = "--myboundary";
     private static final byte[] b = boundry.getBytes();
+
+
+    public static JSONObject getJSONFromEventStreamingData(EventStream stream){
+        JSONObject response = new JSONObject();
+        response.put("totalFrames", stream.getTotalFrames());
+        response.put("currentFrame", stream.getCurrentFrame());
+        response.put("status", stream.getStatus().toString());
+        double current = (double)stream.getCurrentFrame();
+        double total = (double)stream.getTotalFrames();
+        double divValue = current / total;
+        double percentage = divValue * 100;
+        response.put("percentComplete", Math.round(percentage));
+        return response;
+    }
 
     public static void handleRecordedStreaming (HttpServletResponse response, HttpServletRequest request, RecordedStream recordedStream) throws IOException {
         //response.setContentLength((int) pdfFile.length());
@@ -122,7 +138,7 @@ public class StreamingUtils {
     }
 
 
-    private static void sendMJPEGFrame(OutputStream responseOutputStream, byte[] imageData) throws IOException{
+    public static void sendMJPEGFrame(OutputStream responseOutputStream, byte[] imageData) throws IOException{
         responseOutputStream.write(("--myboundary").getBytes());
         responseOutputStream.write(("\r\n").getBytes());
         responseOutputStream.write(("Content-Type:image/jpeg").getBytes());
@@ -136,7 +152,7 @@ public class StreamingUtils {
     }
 
 
-    private static void sendLoadingMJPEGFrame(OutputStream responseOutputStream) throws IOException{
+    public static void sendLoadingMJPEGFrame(OutputStream responseOutputStream) throws IOException{
         File loadingImage = new File("/Users/Ian/Downloads/loading.gif");
         FileInputStream stream = new FileInputStream(loadingImage);
         boolean test = loadingImage.canRead();
@@ -151,5 +167,9 @@ public class StreamingUtils {
         responseOutputStream.write(data);
         responseOutputStream.write(b);
         responseOutputStream.flush();
+    }
+
+    public static String generateRandomStreamId(){
+        return UUID.randomUUID().toString();
     }
 }

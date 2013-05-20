@@ -131,7 +131,7 @@ public class Event {
         }
     }
 
-    public List<byte[]> getStream(){
+    public List<RecordedImage> getStream(){
         org.hibernate.Query query = HibernateUtil.getSessionFactory().openSession().createQuery(this.queryString);
         query.setParameter("start", (this.getTimeStarted() - 5000));
         if (this.getTimeEnded() == 0){
