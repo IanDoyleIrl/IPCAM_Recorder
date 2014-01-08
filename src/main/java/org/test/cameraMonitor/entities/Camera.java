@@ -46,10 +46,20 @@ public class Camera {
     @Column
     private boolean active;
 
+    @Column
+    private boolean saveAllImages;
     //private ControlSystem control;
 
     @OneToMany(mappedBy="camera")
     private Set<Event> events;
+
+    public boolean saveAllImages() {
+        return saveAllImages;
+    }
+
+    public void setSaveAllImages(boolean saveAllImages) {
+        this.saveAllImages = saveAllImages;
+    }
 
     public int getID() {
         return ID;

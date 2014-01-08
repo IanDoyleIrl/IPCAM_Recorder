@@ -26,8 +26,19 @@ public abstract class Image {
     @Column (nullable = false, length = 100000)
     private byte[] imageData;
 
+    @OneToOne
+    private Camera camera;
+
 
     public Image() {
+    }
+
+    public Camera getCamera() {
+        return camera;
+    }
+
+    public void setCamera(Camera camera) {
+        this.camera = camera;
     }
 
     public void setId(int id) {

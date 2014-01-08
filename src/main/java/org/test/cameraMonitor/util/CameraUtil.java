@@ -2,6 +2,8 @@ package org.test.cameraMonitor.util;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.test.cameraMonitor.constants.GlobalAttributes;
+import org.test.cameraMonitor.constants.eventTypes.CAMERA_UPDATE_TYPE;
 import org.test.cameraMonitor.entities.Camera;
 import org.test.cameraMonitor.entities.Event;
 
@@ -43,6 +45,15 @@ public class CameraUtil {
             }
             response.put("events", events);
         }
+        return response;
+    }
+
+    public static JSONObject getNewRecordedImageForCameraJSON(Camera camera){
+        JSONObject response = new JSONObject();
+        response.put("type", CAMERA_UPDATE_TYPE.NEW_IMAGE.toString());
+        response.put("id", camera.getID());
+        response.put("imageTime", GlobalAttributes.getInstance().getLatestImages().get(camera.getID()).getDate());
+        response.put("imageSize", GlobalAttributes.getInstance().getLatestImages().get(camera.getID()).getImageData().length);
         return response;
     }
 

@@ -1,25 +1,18 @@
 package org.test.cameraMonitor.recordingEngine;
 
 import net.sf.jipcam.axis.MjpegFrame;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.test.cameraMonitor.constants.EventType;
 import org.test.cameraMonitor.constants.GlobalAttributes;
-import org.test.cameraMonitor.entities.*;
-import org.test.cameraMonitor.util.DatabaseUtils;
+import org.test.cameraMonitor.constants.eventTypes.CAMERA_UPDATE_TYPE;
+import org.test.cameraMonitor.entities.Camera;
+import org.test.cameraMonitor.entities.RecordedImage;
+import org.test.cameraMonitor.util.ConnectionUtils;
 import org.test.cameraMonitor.util.EventUtils;
-import org.test.cameraMonitor.util.HibernateUtil;
 import org.test.cameraMonitor.util.ImageUtils;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -30,161 +23,87 @@ import java.net.URL;
  */
 public class RecordingEngine implements Runnable {
 
-    private Image compareImage = null;
-    private int compareCount = 0;
-    private int eventCount = 0;
-    private GlobalAttributes global = null;
     private Camera camera;
-    private String s =  GlobalAttributes.getInstance().getConfigValue("FramesPerSecond");
-    private int framesPerSeconds;
     private boolean running = true;
-    private long lastCheckTime = System.currentTimeMillis();
-
-    Logger logger = LogManager.getLogger(RecordingEngine.class.getName());
 
     public RecordingEngine(Camera camera){
         this.camera = camera;
-        try{
-            this.framesPerSeconds = Integer.parseInt(s);
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
     }
 
     public void shutdownThread(){
         this.running = false;
     }
 
-    public void connectToCamera() throws IOException, InterruptedException {
-        while (true){
-            logger.info("Starting run()");
-            logger.error("error");
-            logger.trace("trace");
-            global = GlobalAttributes.getInstance();
-            //global.getAttributes().put("eventTriggered", false);
-            HttpURLConnection connection;
-            URL cam = new URL(camera.getUrl());
-            connection = (HttpURLConnection)cam.openConnection();
-            connection.setConnectTimeout(3);
-            IPCameraTest in = new IPCameraTest(connection.getInputStream());
-            while (running) {
-                MjpegFrame frame = in.readMjpegFrame();
-                createAndSaveNewRecordedImage(frame, camera);
-                logger.info("sleeping.....");
-                Thread.sleep(1000 / framesPerSeconds);
-            }
-        }
+    public HttpURLConnection getCameraConnection() throws IOException, InterruptedException {
+        HttpURLConnection connection;
+        URL cam = new URL(camera.getUrl());
+        connection = (HttpURLConnection)cam.openConnection();
+        return connection;
     }
 
     @Override
     public void run(){
-        while (running){
-            try {
-                connectToCamera();
-            }
-            catch (IOException ioExp){
-                System.out.println("IOException with camera: " + this.camera.getID());
-            }
-            catch (InterruptedException innExp){
-                System.out.println("IOException with camera: " + this.camera.getID());
-            }
-            finally {
-                try {
-                    Thread.sleep(60000);
-                } catch (InterruptedException e) {
-                    System.out.println("Thread exception with camera: " + this.camera.getID());
+        try {
+            RecordedImage previousImage = null;
+            RecordedImage image = null;
+            HttpURLConnection conn = this.getCameraConnection();
+            IPCameraTest in = new IPCameraTest(conn.getInputStream());
+            if (camera != null){
+                while (running){
+                    System.out.println("Image Record @ " + new Date(System.currentTimeMillis()).toGMTString());
+                    MjpegFrame frame = in.readMjpegFrame();
+                    image = this.getImageFromCamera(frame);
+                    GlobalAttributes.getInstance().getLatestImages().put(camera.getID(), image);
+                    ImageCompare ic = ImageUtils.doesImageShowChange(image, previousImage);
+                    if (ic != null){
+                        //System.out.println("Match: " + image.getImageData().length);
+                        if (!GlobalAttributes.getInstance().isEventTriggered()){
+                            EventUtils.triggerEvent(image);
+                            System.out.println("Event ID: " + GlobalAttributes.getInstance().getCurrentEvent().getID() + " - Started");
+                        }
+                        else{
+                            System.out.println("Event ID: " + GlobalAttributes.getInstance().getCurrentEvent().getID() + " - Time Reset");
+                            EventUtils.resetEventTimeRemaining();
+                        }
+                        ImageUtils.saveEventImage(ic);
+                    }
+                    if (GlobalAttributes.getInstance().isEventTriggered()){
+                        if (EventUtils.getEventTimeRemaining() <= 0){
+                            System.out.println("Event ID: " + GlobalAttributes.getInstance().getCurrentEvent().getID() + " - Stopped");
+                            EventUtils.stopEvent();
+                        }
+                    }
+                    if (ImageUtils.shouldSaveImage(image)){
+                            image.save();
+                    }
+                    previousImage = image;
+                    GlobalAttributes.getInstance().updateLatestCameraImage(camera.getID(), image);
+                    System.out.println("Latest Image For Camera " + camera.getID() + " updated @ " + System.currentTimeMillis());
+                    ConnectionUtils.notifyAllCameraListeners(camera, CAMERA_UPDATE_TYPE.NEW_IMAGE);
+                    Thread.sleep(ImageUtils.getThreadSleepTime(image));
                 }
+            }
+        }
+        catch (InterruptedException innExp){
+            System.out.println("IOException with camera: " + this.camera.getID());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                Thread.sleep(60000);
+            } catch (InterruptedException e) {
+                System.out.println("Thread exception with camera: " + this.camera.getID());
             }
         }
     }
 
-    private void createAndSaveNewRecordedImage(MjpegFrame frame, Camera camera) throws IOException {
-        //System.out.println("createAndSaveNewRecordedImage() frameLength: " + frame.getBytes().length + ", camera: " + camera.getID());
+    private RecordedImage getImageFromCamera(MjpegFrame frame) {
         byte[] tempImage = (frame.getJpegBytes());
         RecordedImage rImg = new RecordedImage();
-        //rImg.setCamera(camera);
+        rImg.setCamera(camera);
         rImg.setDate(System.currentTimeMillis());
         rImg.setImageData(tempImage);
-        rImg.save();
-        compareCount ++;
-        if (compareCount > 10){
-            if (compareImage != null){
-                this.comparePreviousImageWithLatest(rImg);
-            }
-            compareImage = rImg;
-            compareCount = 0;
-            //global.resetEventTimestamp();
-        }
-        long currentTime = System.currentTimeMillis();
-        long timeStamp = global.getEventTimestamp();
-        long diff = (currentTime - timeStamp) / 1000;
-        int timeout = Integer.parseInt(global.getConfigValue("EventTimeout"));
-        //System.out.println("Diff: " + diff + ", currentTime: " + System.currentTimeMillis() + ", eventTime: " + timeStamp);
-        Event currentEvent = global.getCurrentEvent();
-        if (currentEvent != null & diff >= timeout){
-            Transaction tx = null;
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-            tx = session.beginTransaction();
-            Event event = global.getCurrentEvent();
-            event.setTimeEnded(System.currentTimeMillis());
-            event.setEventType(EventType.UNSURE);
-            session.saveOrUpdate(event);
-            tx.commit();
-            global.setCurrentEvent(null);
-            global.setEventTriggered(false);
-            global.resetEventTimestamp();
-        }
-    }
-
-    private void comparePreviousImageWithLatest(Image currentImage) throws IOException {
-        BufferedImage newImage = ImageUtils.getBIFromImage(currentImage);
-        BufferedImage oldImage = ImageUtils.getBIFromImage(compareImage);
-        ImageCompare ic = new ImageCompare(oldImage, newImage);
-        ic.setParameters(12, 8, 5, 10);
-        ic.setDebugMode(0);
-        ic.compare();
-        System.out.println(ic.match() + " - " + System.currentTimeMillis());
-        if (!ic.match()){
-            Transaction tx = null;
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-            tx = session.beginTransaction();
-            //session.save(this);
-            //tx.commit();
-            //session.close();
-            boolean eventTriggered = global.isEventTriggered();
-            if (!eventTriggered){
-                Event event = new Event();
-                event.setTimeStarted(System.currentTimeMillis());
-                event.setName(EventUtils.convertTime(System.currentTimeMillis()));
-                event.setCamera(camera);
-                event.setComments("Some comments go here");
-                session.save(event);
-                global.setCurrentEvent(event);
-                global.setEventTriggered(true);
-                if (Boolean.parseBoolean(global.getConfigValue("SendToEmail"))){
-                    global.getEmailQueue().add(event);
-                }
-            }
-            //System.out.println("Event Triggered");
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            ImageIO.write(ic.getChangeIndicator(), "jpg", outputStream);
-            byte[] imageBytes = outputStream.toByteArray();
-            EventImage eImg = new EventImage();
-            eImg.setDate(System.currentTimeMillis());
-            eImg.setImageData(imageBytes);
-            Event event = global.getCurrentEvent();
-            event.getEventImages().add(eImg);
-            eImg.setEvent(event);
-            session.saveOrUpdate(event);
-            session.save(eImg);
-            tx.commit();
-            if (Boolean.parseBoolean(global.getConfigValue("SendToS3"))){
-                global.getS3Queue().add(eImg);
-            }
-            global.resetEventTimestamp();
-            //session.close();
-        }
+        return rImg;
     }
 
 }

@@ -1,18 +1,20 @@
 package org.test.cameraMonitor.util;
 
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.test.cameraMonitor.constants.GlobalAttributes;
+import org.test.cameraMonitor.constants.eventTypes.EVENT_UPDATE_TYPE;
 import org.test.cameraMonitor.entities.Event;
 import org.test.cameraMonitor.entities.EventImage;
+import org.test.cameraMonitor.entities.RecordedImage;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.Format;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -83,12 +85,75 @@ public class EventUtils {
         return response;
     }
 
-    public static JSONObject getJSONFromEventStreamingData(EventStreamingData data){
+
+    public static void triggerEvent(RecordedImage image) throws IOException {
+        Event event = new Event();
+        event.setTimeStarted(System.currentTimeMillis());
+        event.setName(EventUtils.convertTime(System.currentTimeMillis()));
+        event.setCamera(image.getCamera());
+        event.setComments("Some comments go here");
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        Transaction tx = session.beginTransaction();
+        session.save(event);
+        GlobalAttributes.getInstance().setEventTimestamp(System.currentTimeMillis());
+        GlobalAttributes.getInstance().setCurrentEvent(event);
+        GlobalAttributes.getInstance().setEventTriggered(true);
+        session.close();
+        ConnectionUtils.notifyAllEventListeners(GlobalAttributes.getInstance().getCurrentEvent(), EVENT_UPDATE_TYPE.STARTED);
+    }
+
+    public static int getEventTimeRemaining() {
+        long diff = System.currentTimeMillis() - GlobalAttributes.getInstance().getEventTimestamp();
+        int secondsDifference = Math.round(diff / 1000);
+        System.out.println("Event ID: " + GlobalAttributes.getInstance().getCurrentEvent().getID() + " - " + (GlobalAttributes.getInstance().getEventTimeout() - secondsDifference) + " remaining");
+        return GlobalAttributes.getInstance().getEventTimeout() - secondsDifference;
+    }
+
+    public static void stopEvent() throws IOException {
+        Event event = GlobalAttributes.getInstance().getCurrentEvent();
+        event.setTimeEnded(System.currentTimeMillis());
+        GlobalAttributes.getInstance().setCurrentEvent(null);
+        GlobalAttributes.getInstance().setEventTriggered(false);
+        ConnectionUtils.notifyAllEventListeners(GlobalAttributes.getInstance().getCurrentEvent(), EVENT_UPDATE_TYPE.STOPPED);
+    }
+
+    public static void resetEventTimeRemaining() {
+        GlobalAttributes.getInstance().setEventTimestamp(System.currentTimeMillis());
+    }
+
+    public static JSONObject getNewEventImageJSON(Event event) {
         JSONObject response = new JSONObject();
-        response.put("totalFrames", data.getTotalFrameCount());
-        response.put("currentFrame", data.getCurrentFrameCount());
-        response.put("readyToStream", data.isReadyToStream());
+        response.put("eventId", event.getID());
+        response.put("eventType", EVENT_UPDATE_TYPE.NEW_EVENT_IMAGE.toString());
         return response;
     }
 
+    public static JSONObject getNewEventStartedJSON(Event event) {
+        JSONObject response = new JSONObject();
+        response.put("eventId", event.getID());
+        response.put("eventType", EVENT_UPDATE_TYPE.STARTED.toString());
+        return response;
+    }
+
+    public static JSONObject getEventStoppedJSON(Event event) {
+        JSONObject response = new JSONObject();
+        response.put("eventId", event.getID());
+        response.put("eventType", EVENT_UPDATE_TYPE.STOPPED.toString());
+        return response;
+    }
+
+    public static JSONObject getEventExtendedJSON(Event event) {
+        JSONObject response = new JSONObject();
+        response.put("eventId", event.getID());
+        response.put("eventType", EVENT_UPDATE_TYPE.EXTENDED.toString());
+        response.put("totalRemainingTime", EventUtils.getEventTimeRemaining());
+        return response;
+    }
+
+    public static JSONObject getEventUpdatedJSON(Event event) {
+        JSONObject response = new JSONObject();
+        response.put("eventId", event.getID());
+        response.put("eventType", EVENT_UPDATE_TYPE.NEW_EVENT_IMAGE.toString());
+        return response;
+    }
 }

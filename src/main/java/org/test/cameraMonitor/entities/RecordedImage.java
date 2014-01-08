@@ -22,4 +22,5 @@ public class RecordedImage extends Image {
         super();
         this.setImageData(info);
     }
+
 }

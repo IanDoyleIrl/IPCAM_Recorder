@@ -6,34 +6,6 @@
     <listener>
         <listener-class>org.test.cameraMonitor.recordingEngine.RecordingThreadManager</listener-class>
     </listener>
-
-    <servlet>
-        <servlet-name>RealtimeStream</servlet-name>
-        <servlet-class>org.test.cameraMonitor.websocket.StreamingHandlerServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>RealtimeStream</servlet-name>
-        <url-pattern>/RealtimeUpdate</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>StreamingHandler</servlet-name>
-        <servlet-class>org.test.cameraMonitor.websocket.StreamingHandlerServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>StreamingHandler</servlet-name>
-        <url-pattern>/StreamingHandler</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>Videostream</servlet-name>
-        <servlet-class>org.test.cameraMonitor.streamingServer.StreamingServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>Videostream</servlet-name>
-        <url-pattern>/Videostream</url-pattern>
-    </servlet-mapping>
-
     <servlet>
         <servlet-name>IPCameraMonitor</servlet-name>
         <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>

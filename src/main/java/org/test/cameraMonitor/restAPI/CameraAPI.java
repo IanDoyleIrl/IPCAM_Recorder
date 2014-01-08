@@ -3,13 +3,17 @@ package org.test.cameraMonitor.restAPI;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+import org.test.cameraMonitor.constants.GlobalAttributes;
 import org.test.cameraMonitor.entities.Camera;
+import org.test.cameraMonitor.entities.Image;
+import org.test.cameraMonitor.entities.RecordedImage;
 import org.test.cameraMonitor.util.CameraUtil;
 import org.test.cameraMonitor.util.HibernateUtil;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -40,7 +44,7 @@ public class CameraAPI {
         while (cameraIterator.hasNext()){
             response.add(CameraUtil.getCameraJSON(cameraIterator.next(), false, false));
         }
-        return Response.ok(response.toJSONString()).build();
+        return Response.ok(response.toJSONString()).header("Access-Control-Allow-Origin", "*").build();
     }
 
     @GET
@@ -52,7 +56,11 @@ public class CameraAPI {
         while (cameraIterator.hasNext()){
             response.add(CameraUtil.getCameraJSON(cameraIterator.next(), false, false));
         }
-        return Response.ok(response.toJSONString()).build();
+        return Response.ok(response.toJSONString())
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Methods", "POST, GET, PUT, UPDATE, OPTIONS")
+                .header("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With")
+                .build();
     }
 
     @GET
@@ -64,6 +72,19 @@ public class CameraAPI {
             return Response.status(404).build();
         }
         return Response.ok(CameraUtil.getCameraJSON(camera, showEvents, showConnectionStatus).toJSONString()).build();
+    }
+
+    @GET
+    @Produces("image/jpeg")
+    @Path("/{id}/latestImage")
+    public Response getLatestImage(@PathParam("id") int id){
+        Camera camera = (Camera)HibernateUtil.getSessionFactory().openSession().get(Camera.class, id);
+        HashMap<Integer, RecordedImage> cameraRecordedImageHashMap= GlobalAttributes.getInstance().getLatestImages();
+        Image image = cameraRecordedImageHashMap.get(camera.getID());
+        if (image == null){
+            throw new WebApplicationException(404);
+        }
+        return Response.ok(image.getImageData()).build();
     }
 
     @GET

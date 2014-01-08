@@ -28,9 +28,9 @@ public class RecordingThreadManager implements ServletContextListener {
 
     public void contextInitialized(ServletContextEvent sce) {
         tasks.add((new CameraMonitorThreadManager()));
-        tasks.add(new AWS_S3StorageManager());
-        tasks.add(new EmailManager());
-        tasks.add(new DatabaseUtilManager());
+//        tasks.add(new AWS_S3StorageManager());
+//        tasks.add(new EmailManager());
+//        tasks.add(new DatabaseUtilManager());
         for (ThreadManagerInterface c : tasks){
                 executor.execute(c);
         }

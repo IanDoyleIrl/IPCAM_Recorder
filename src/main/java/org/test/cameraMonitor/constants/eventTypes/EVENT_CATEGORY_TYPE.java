@@ -1,4 +1,4 @@
-package org.test.cameraMonitor.constants;
+package org.test.cameraMonitor.constants.eventTypes;
 
 /**
  * Created with IntelliJ IDEA.
@@ -7,8 +7,8 @@ package org.test.cameraMonitor.constants;
  * Time: 20:17
  * To change this template use File | Settings | File Templates.
  */
-public enum EventType {
+public enum EVENT_CATEGORY_TYPE {
 
-    IGNORE, SUSPICIOUS, UNSURE;
+    IGNORE, SUSPICIOUS, UNSURE
 
 }

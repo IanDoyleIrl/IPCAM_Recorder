@@ -1,7 +1,11 @@
 package org.test.cameraMonitor.util;
 
+import org.hibernate.Transaction;
+import org.test.cameraMonitor.constants.GlobalAttributes;
+import org.test.cameraMonitor.entities.EventImage;
 import org.test.cameraMonitor.entities.Image;
 import org.test.cameraMonitor.entities.RecordedImage;
+import org.test.cameraMonitor.recordingEngine.ImageCompare;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -69,4 +73,58 @@ public class ImageUtils {
         return sdf.format(new Date(dateTime));
     }
 
+    public static ImageCompare doesImageShowChange(Image currentImage, Image compareImage) throws IOException{
+        if (currentImage == null | compareImage == null){
+            return null;
+        }
+        BufferedImage newImage = ImageUtils.getBIFromImage(currentImage);
+        BufferedImage oldImage = ImageUtils.getBIFromImage(compareImage);
+        ImageCompare ic = new ImageCompare(oldImage, newImage);
+        ic.setParameters(12, 8, 5, 10);
+        ic.setDebugMode(0);
+        ic.compare();
+        //System.out.println(ic.match() + " - " + System.currentTimeMillis());
+        if (!ic.match()){
+            return ic;
+        }
+        return null;
+    }
+
+    public static void saveEventImage(ImageCompare ic) throws IOException {
+        //System.out.println("Saving Event Image");
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ImageIO.write(ic.getChangeIndicator(), "jpg", outputStream);
+        byte[] imageBytes = outputStream.toByteArray();
+        EventImage eImg = new EventImage();
+        eImg.setDate(System.currentTimeMillis());
+        eImg.setImageData(imageBytes);
+        org.test.cameraMonitor.entities.Event event = GlobalAttributes.getInstance().getCurrentEvent();
+        event.getEventImages().add(eImg);
+        eImg.setEvent(event);
+        Transaction tx = null;
+        org.hibernate.Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        tx = session.beginTransaction();
+        session.saveOrUpdate(event);
+        session.save(eImg);
+        tx.commit();
+//        session.close();
+    }
+
+    public static boolean shouldSaveImage(RecordedImage image) {
+        GlobalAttributes globalAttributes = GlobalAttributes.getInstance();
+        if (globalAttributes.isEventTriggered()){
+            return true;
+        }
+        if (image.getCamera().saveAllImages() | globalAttributes.saveAllImages()){
+            return true;
+        }
+        return true;
+    }
+
+    public static long getThreadSleepTime(RecordedImage image) {
+        if (GlobalAttributes.getInstance().isEventTriggered()){
+            return 67;
+        }
+        return 1000;
+    }
 }

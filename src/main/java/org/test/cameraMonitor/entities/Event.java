@@ -2,7 +2,7 @@ package org.test.cameraMonitor.entities;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.test.cameraMonitor.constants.EventType;
+import org.test.cameraMonitor.constants.eventTypes.EVENT_CATEGORY_TYPE;
 import org.test.cameraMonitor.util.HibernateUtil;
 
 import javax.persistence.*;
@@ -40,7 +40,7 @@ public class Event {
     private String comments;
 
     @Column(nullable = true)
-    private EventType eventType;
+    private EVENT_CATEGORY_TYPE eventType;
 
     @ManyToOne
     @JoinColumn(name="camera_id")
@@ -48,6 +48,7 @@ public class Event {
 
     @OneToMany(mappedBy="event")
     private Set<EventImage> eventImages = new HashSet<EventImage>();
+
 
     public Event() {
         //this.timeStarted = timeStarted;
@@ -93,11 +94,11 @@ public class Event {
         this.comments = comments;
     }
 
-    public EventType getEventType() {
+    public EVENT_CATEGORY_TYPE getEventType() {
         return eventType;
     }
 
-    public void setEventType(EventType eventType) {
+    public void setEventType(EVENT_CATEGORY_TYPE eventType) {
         this.eventType = eventType;
     }
 
